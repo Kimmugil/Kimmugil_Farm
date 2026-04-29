@@ -83,7 +83,7 @@ export async function fetchCards(): Promise<Card[]> {
 
   const res = await sheets.spreadsheets.values.get({
     spreadsheetId,
-    range: "CARDS!A:J",
+    range: "CARDS!A:L",
   });
 
   const rows = res.data.values ?? [];
@@ -106,6 +106,8 @@ export async function fetchCards(): Promise<Card[]> {
         설명3: get(headers.indexOf("설명3")),
         설명4: get(headers.indexOf("설명4")),
         URL: get(headers.indexOf("URL")),
+        뱃지: get(headers.indexOf("뱃지")).trim().toUpperCase(),
+        상태: get(headers.indexOf("상태")).trim().toUpperCase(),
       };
     })
     .filter((c) => c.온오프)

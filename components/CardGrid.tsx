@@ -9,7 +9,9 @@ interface Props {
 }
 
 export default function CardGrid({ cards, texts }: Props) {
-  const detailsLabel = texts["CARD_DETAILS_LABEL"] ?? "DETAILS";
+  const detailsLabel   = texts["CARD_DETAILS_LABEL"]    ?? "DETAILS";
+  const soonLabel      = texts["CARD_SOON_LABEL"]       ?? "준비중...";
+  const soonNoUrlMsg   = texts["CARD_SOON_NO_URL_MSG"]  ?? "아직 준비 중인 프로젝트입니다.";
 
   return (
     <section className="max-w-screen-xl mx-auto px-5 pt-14 pb-16">
@@ -32,7 +34,13 @@ export default function CardGrid({ cards, texts }: Props) {
           style={{ gridTemplateColumns: "repeat(auto-fill, minmax(260px, 1fr))" }}
         >
           {cards.map((card) => (
-            <ProjectCard key={card.순서} card={card} detailsLabel={detailsLabel} />
+            <ProjectCard
+              key={card.순서}
+              card={card}
+              detailsLabel={detailsLabel}
+              soonLabel={soonLabel}
+              soonNoUrlMsg={soonNoUrlMsg}
+            />
           ))}
         </div>
       )}

@@ -20,6 +20,8 @@ export interface Card {
   설명3: string;
   설명4: string;
   URL: string;
+  뱃지: string;
+  상태: string;
 }
 
 export interface SheetUpdatePayload {
