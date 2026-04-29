@@ -1,13 +1,15 @@
 "use client";
 
 import { useState } from "react";
-import type { Card, UITexts } from "@/lib/types";
+import type { Card, UITexts, DmMessage } from "@/lib/types";
 import ProjectCard from "./ProjectCard";
+import DmPanel from "./DmPanel";
 
 interface Props {
   cards: Card[];
   texts: UITexts;
   scrollSpeed: number;
+  initialDms: DmMessage[];
 }
 
 function MarqueeIcon({ active }: { active: boolean }) {
@@ -33,7 +35,7 @@ function GridIcon({ active }: { active: boolean }) {
   );
 }
 
-export default function PageLayout({ cards, texts, scrollSpeed }: Props) {
+export default function PageLayout({ cards, texts, scrollSpeed, initialDms }: Props) {
   const [view, setView] = useState<"marquee" | "grid">("marquee");
   const [hoveredIdx, setHoveredIdx] = useState<number | null>(null);
 
@@ -59,7 +61,10 @@ export default function PageLayout({ cards, texts, scrollSpeed }: Props) {
   return (
     <main className="min-h-screen flex flex-col overflow-hidden">
 
-      {/* 타이틀 영역 */}
+      {/* 타이틀 + DM 패널 */}
+      <div className="flex-1 flex overflow-hidden min-h-0">
+
+      {/* 좌: 타이틀 */}
       <div className="flex-1 flex flex-col justify-center pl-[10%] pr-8 pt-12 pb-4 relative">
 
         {/* 뷰 전환 버튼 — 우측 상단 */}
@@ -107,6 +112,13 @@ export default function PageLayout({ cards, texts, scrollSpeed }: Props) {
           </div>
         )}
       </div>
+
+      {/* 우: DM 패널 */}
+      <div className="hidden lg:flex w-[340px] xl:w-[380px] shrink-0 border-l border-[#141414]">
+        <DmPanel initialDms={initialDms} texts={texts} />
+      </div>
+
+      </div>{/* end flex-1 row */}
 
       {/* 카드 영역 */}
       <div className="border-t border-[#1a1a1a] mb-20">

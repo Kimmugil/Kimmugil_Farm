@@ -1,5 +1,5 @@
 import { google } from "googleapis";
-import type { SiteConfig, UITexts, Card } from "./types";
+import type { SiteConfig, UITexts, Card, DmMessage } from "./types";
 
 function getAuthClient() {
   const email = process.env.GOOGLE_SERVICE_ACCOUNT_EMAIL;
@@ -54,6 +54,7 @@ export async function fetchConfig(): Promise<SiteConfig> {
     META_TITLE: map["META_TITLE"] ?? "Portfolio",
     META_DESC: map["META_DESC"] ?? "",
     SCROLL_SPEED: parseInt(map["SCROLL_SPEED"] ?? "") || 30,
+    DM_ANON_NICKNAME: map["DM_ANON_NICKNAME"] ?? "익명의 농부",
   };
 }
 
@@ -133,4 +134,49 @@ export async function updateSheetRange(
     valueInputOption: "USER_ENTERED",
     requestBody: { values },
   });
+}
+
+export async function fetchDMs(): Promise<DmMessage[]> {
+  const sheets = await getSheetsClient();
+  const spreadsheetId = getSheetId();
+
+  const res = await sheets.spreadsheets.values.get({
+    spreadsheetId,
+    range: "DM!A:D",
+  });
+
+  const rows = res.data.values ?? [];
+  if (rows.length < 2) return [];
+
+  // 헤더 스킵, UUID 제외(A열), 최신 30개
+  const dataRows = rows.slice(1).slice(-30);
+  return dataRows.map((row) => ({
+    nickname: row[2] ?? "알 수 없음",
+    content:  row[3] ?? "",
+    timestamp: row[1] ?? "",
+  })).filter((m) => m.content.trim());
+}
+
+export async function appendDM(
+  nickname: string,
+  content: string,
+  anonNickname: string
+): Promise<DmMessage> {
+  const sheets = await getSheetsClient();
+  const spreadsheetId = getSheetId();
+
+  const uuid = crypto.randomUUID();
+  const timestamp = new Date().toLocaleString("ko-KR", { timeZone: "Asia/Seoul" });
+  const finalNickname = nickname.trim()
+    ? nickname.trim()
+    : `${anonNickname}#${Math.floor(Math.random() * 9000 + 1000)}`;
+
+  await sheets.spreadsheets.values.append({
+    spreadsheetId,
+    range: "DM!A:D",
+    valueInputOption: "USER_ENTERED",
+    requestBody: { values: [[uuid, timestamp, finalNickname, content]] },
+  });
+
+  return { nickname: finalNickname, content, timestamp };
 }

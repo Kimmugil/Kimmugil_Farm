@@ -4,6 +4,13 @@ export interface SiteConfig {
   META_TITLE: string;
   META_DESC: string;
   SCROLL_SPEED: number;
+  DM_ANON_NICKNAME: string;
+}
+
+export interface DmMessage {
+  nickname: string;
+  content: string;
+  timestamp: string;
 }
 
 export interface UITexts {
