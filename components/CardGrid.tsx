@@ -59,7 +59,7 @@ export default function CardGrid({ cards, texts }: Props) {
       {/* 푸터 */}
       {texts["FOOTER_TEXT"] && (
         <footer className="mt-16 pt-6 border-t border-[#1e1e1e] text-center">
-          <p className="text-xs text-[#444444]">{texts["FOOTER_TEXT"]}</p>
+          <p className="text-xs text-[#444444] text-right">{texts["FOOTER_TEXT"]}</p>
         </footer>
       )}
     </main>
