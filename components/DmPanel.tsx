@@ -94,21 +94,27 @@ export default function DmPanel({ initialDms, texts }: Props) {
   return (
     <div className="flex flex-col h-full">
 
-      {/* 버블 목록 — 경계선 없이 공간에 둥둥 */}
+      {/* 버블 목록 — 상단 페이드, 스크롤 가능 */}
       <div
         ref={listRef}
-        className="flex-1 overflow-y-auto px-6 py-8 space-y-3 min-h-0"
-        style={{ scrollbarWidth: "none", WebkitOverflowScrolling: "touch" } as React.CSSProperties}
+        className="flex-1 overflow-y-auto min-h-0 px-6"
+        style={{
+          scrollbarWidth: "none",
+          maskImage: "linear-gradient(to bottom, transparent 0%, black 28%, black 100%)",
+          WebkitMaskImage: "linear-gradient(to bottom, transparent 0%, black 28%, black 100%)",
+        } as React.CSSProperties}
       >
-        {dms.length === 0 ? (
-          <div className="h-full flex items-end pb-4">
-            <p className="text-[11px] text-[#666666] leading-relaxed">
+        {/* 상단 여백 — 버블을 타이틀 높이 아래로 밀어내기 */}
+        <div className="h-[38%]" />
+        <div className="space-y-3 pb-4">
+          {dms.length === 0 ? (
+            <p className="text-[11px] text-[#555555] leading-relaxed">
               {t("DM_EMPTY_MSG", "아직 아무도 글을 남기지 않았어요")}
             </p>
-          </div>
-        ) : (
-          dms.map((msg, i) => <Bubble key={i} msg={msg} />)
-        )}
+          ) : (
+            dms.map((msg, i) => <Bubble key={i} msg={msg} />)
+          )}
+        </div>
       </div>
 
       {/* 입력 폼 — 경계선 없이 바닥에 */}

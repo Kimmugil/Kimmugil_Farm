@@ -88,7 +88,7 @@ export default function PageLayout({ cards, texts, scrollSpeed, initialDms }: Pr
       </div>
 
       {/* 우: DM — 경계선 없이 공간에 녹아듦 */}
-      <div className="hidden lg:flex w-[420px] xl:w-[500px] shrink-0">
+      <div className="hidden lg:flex w-[55%] shrink-0">
         <DmPanel initialDms={initialDms} texts={texts} />
       </div>
 
@@ -97,8 +97,8 @@ export default function PageLayout({ cards, texts, scrollSpeed, initialDms }: Pr
       {/* 카드 영역 */}
       <div className="border-t border-[#1a1a1a] mb-20">
 
-        {/* 뷰 전환 버튼 — 카드 바로 위 우측 */}
-        <div className="flex justify-end px-6 pt-4 pb-0 gap-2">
+        {/* 뷰 전환 버튼 — 카드 바로 위, 타이틀과 같은 좌측 패딩 */}
+        <div className="flex justify-start pl-[10%] pt-4 pb-0 gap-2">
           <button
             onClick={() => setView("marquee")}
             title="슬라이드 보기"
@@ -168,7 +168,7 @@ export default function PageLayout({ cards, texts, scrollSpeed, initialDms }: Pr
         ) : (
 
           /* ── 그리드 뷰 ── */
-          <div className="px-8 md:px-16 pt-7 pb-10">
+          <div className="pl-[10%] pr-8 pt-7 pb-10">
             <div
               className="grid gap-4"
               style={{ gridTemplateColumns: "repeat(auto-fill, minmax(280px, 1fr))" }}
