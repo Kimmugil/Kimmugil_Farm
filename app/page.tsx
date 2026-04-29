@@ -16,6 +16,7 @@ export default async function Home() {
         isOpen={config.OPEN}
         initialTexts={texts}
         initialCards={cards}
+        scrollSpeed={config.SCROLL_SPEED}
       />
     );
   } catch (err) {

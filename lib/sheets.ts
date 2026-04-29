@@ -53,6 +53,7 @@ export async function fetchConfig(): Promise<SiteConfig> {
     ADMIN_PASSWORD: map["ADMIN_PASSWORD"] ?? "",
     META_TITLE: map["META_TITLE"] ?? "Portfolio",
     META_DESC: map["META_DESC"] ?? "",
+    SCROLL_SPEED: parseInt(map["SCROLL_SPEED"] ?? "") || 30,
   };
 }
 

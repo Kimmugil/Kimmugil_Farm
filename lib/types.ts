@@ -3,6 +3,7 @@ export interface SiteConfig {
   ADMIN_PASSWORD: string;
   META_TITLE: string;
   META_DESC: string;
+  SCROLL_SPEED: number;
 }
 
 export interface UITexts {

@@ -63,10 +63,10 @@ body {
   display: inline-block;
 }
 
-/* 세로 마퀴 애니메이션 */
-@keyframes marquee-down {
-  from { transform: translateY(0); }
-  to   { transform: translateY(-33.333%); }
+/* 수평 마퀴 (오른쪽 → 왼쪽) */
+@keyframes marquee-left {
+  from { transform: translateX(0); }
+  to   { transform: translateX(-50%); }
 }
 
 /* 스크롤바 다크 스타일 */

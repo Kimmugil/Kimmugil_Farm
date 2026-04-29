@@ -3,15 +3,16 @@
 import { useState, useCallback } from "react";
 import type { Card, UITexts } from "@/lib/types";
 import LockScreen from "./LockScreen";
-import CardGrid from "./CardGrid";
+import PageLayout from "./PageLayout";
 
 interface Props {
   isOpen: boolean;
   initialTexts: UITexts;
   initialCards: Card[];
+  scrollSpeed: number;
 }
 
-export default function PortfolioClient({ isOpen, initialTexts, initialCards }: Props) {
+export default function PortfolioClient({ isOpen, initialTexts, initialCards, scrollSpeed }: Props) {
   const [unlocked, setUnlocked] = useState(isOpen);
   const [texts, setTexts] = useState<UITexts>(initialTexts);
   const [cards, setCards] = useState<Card[]>(initialCards);
@@ -53,7 +54,7 @@ export default function PortfolioClient({ isOpen, initialTexts, initialCards }: 
 
   return (
     <>
-      <CardGrid cards={cards} texts={texts} />
+      <PageLayout cards={cards} texts={texts} scrollSpeed={scrollSpeed} />
 
       {/* 동기화 버튼 */}
       <div className="fixed bottom-5 right-5 z-40 flex flex-col items-end gap-1.5">
