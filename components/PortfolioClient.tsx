@@ -3,7 +3,6 @@
 import { useState, useCallback } from "react";
 import type { Card, UITexts } from "@/lib/types";
 import LockScreen from "./LockScreen";
-import HeroSection from "./HeroSection";
 import CardGrid from "./CardGrid";
 
 interface Props {
@@ -54,10 +53,9 @@ export default function PortfolioClient({ isOpen, initialTexts, initialCards }: 
 
   return (
     <>
-      <HeroSection cards={cards} texts={texts} />
       <CardGrid cards={cards} texts={texts} />
 
-      {/* 동기화 버튼 — 우측 하단 고정 */}
+      {/* 동기화 버튼 */}
       <div className="fixed bottom-5 right-5 z-40 flex flex-col items-end gap-1.5">
         {lastSynced && (
           <p className="text-[10px] text-[#444444] pr-1">
@@ -70,18 +68,7 @@ export default function PortfolioClient({ isOpen, initialTexts, initialCards }: 
           title="구글 시트와 동기화"
           className="w-10 h-10 rounded-full bg-[#1a1a1a] border border-[#2a2a2a] flex items-center justify-center text-[#555555] hover:text-white hover:border-[#444444] transition-all disabled:cursor-not-allowed"
         >
-          <svg
-            xmlns="http://www.w3.org/2000/svg"
-            width="16"
-            height="16"
-            viewBox="0 0 24 24"
-            fill="none"
-            stroke="currentColor"
-            strokeWidth="2"
-            strokeLinecap="round"
-            strokeLinejoin="round"
-            className={syncing ? "animate-spin" : ""}
-          >
+          <svg xmlns="http://www.w3.org/2000/svg" width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round" className={syncing ? "animate-spin" : ""}>
             <path d="M3 12a9 9 0 0 1 9-9 9.75 9.75 0 0 1 6.74 2.74L21 8" />
             <path d="M21 3v5h-5" />
             <path d="M21 12a9 9 0 0 1-9 9 9.75 9.75 0 0 1-6.74-2.74L3 16" />
