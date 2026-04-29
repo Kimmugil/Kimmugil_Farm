@@ -53,6 +53,16 @@ body {
   animation: fade-in 0.2s ease forwards;
 }
 
+/* 화살표 통통 튀기 */
+@keyframes bounce-arrow {
+  0%, 100% { transform: translateY(0); }
+  50%       { transform: translateY(7px); }
+}
+.animate-bounce-arrow {
+  animation: bounce-arrow 1.4s ease-in-out infinite;
+  display: inline-block;
+}
+
 /* 세로 마퀴 애니메이션 */
 @keyframes marquee-down {
   from { transform: translateY(0); }

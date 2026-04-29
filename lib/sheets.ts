@@ -89,25 +89,27 @@ export async function fetchCards(): Promise<Card[]> {
   const rows = res.data.values ?? [];
   if (rows.length < 2) return [];
 
-  const headers = rows[0];
+  // 헤더 공백·대소문자 정규화 후 인덱스 조회
+  const normalHeaders = rows[0].map((h: string) => (h ?? "").trim().toLowerCase());
+  const col = (name: string) => normalHeaders.indexOf(name.trim().toLowerCase());
   const dataRows = rows.slice(1);
 
   const cards: Card[] = dataRows
     .map((row) => {
-      const get = (i: number) => row[i] ?? "";
+      const get = (i: number) => (i >= 0 ? (row[i] ?? "") : "");
       return {
-        순서: parseInt(get(headers.indexOf("순서"))) || 0,
-        온오프: get(headers.indexOf("온오프"))?.toLowerCase() === "true",
-        아이콘: get(headers.indexOf("아이콘")),
-        타이틀: get(headers.indexOf("타이틀")),
-        서브타이틀: get(headers.indexOf("서브타이틀")),
-        설명1: get(headers.indexOf("설명1")),
-        설명2: get(headers.indexOf("설명2")),
-        설명3: get(headers.indexOf("설명3")),
-        설명4: get(headers.indexOf("설명4")),
-        URL: get(headers.indexOf("URL")),
-        뱃지: get(headers.indexOf("뱃지")).trim().toUpperCase(),
-        상태: get(headers.indexOf("상태")).trim().toUpperCase(),
+        순서: parseInt(get(col("순서"))) || 0,
+        온오프: get(col("온오프")).toLowerCase() === "true",
+        아이콘: get(col("아이콘")),
+        타이틀: get(col("타이틀")),
+        서브타이틀: get(col("서브타이틀")),
+        설명1: get(col("설명1")),
+        설명2: get(col("설명2")),
+        설명3: get(col("설명3")),
+        설명4: get(col("설명4")),
+        URL: get(col("url")),
+        뱃지: get(col("뱃지")).trim().toUpperCase(),
+        상태: get(col("상태")).trim().toUpperCase(),
       };
     })
     .filter((c) => c.온오프)
