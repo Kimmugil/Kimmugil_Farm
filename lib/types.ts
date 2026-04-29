@@ -5,6 +5,8 @@ export interface SiteConfig {
   META_DESC: string;
   SCROLL_SPEED: number;
   DM_ANON_NICKNAME: string;
+  DM_LEFT_OFFSET: string;
+  DM_RIGHT_PADDING: string;
 }
 
 export interface DmMessage {

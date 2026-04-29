@@ -10,6 +10,8 @@ interface Props {
   texts: UITexts;
   scrollSpeed: number;
   initialDms: DmMessage[];
+  dmLeftOffset: string;
+  dmRightPadding: string;
 }
 
 function MarqueeIcon({ active }: { active: boolean }) {
@@ -35,7 +37,7 @@ function GridIcon({ active }: { active: boolean }) {
   );
 }
 
-export default function PageLayout({ cards, texts, scrollSpeed, initialDms }: Props) {
+export default function PageLayout({ cards, texts, scrollSpeed, initialDms, dmLeftOffset, dmRightPadding }: Props) {
   const [view, setView] = useState<"marquee" | "grid">("marquee");
   const [hoveredIdx, setHoveredIdx] = useState<number | null>(null);
 
@@ -62,11 +64,10 @@ export default function PageLayout({ cards, texts, scrollSpeed, initialDms }: Pr
     <main className="min-h-screen flex flex-col overflow-hidden">
 
       {/* 타이틀 + DM 패널 */}
-      <div className="flex-1 flex overflow-hidden min-h-0">
+      <div className="flex-1 overflow-hidden min-h-0 relative">
 
-      {/* 좌: 타이틀 */}
-      <div className="flex-1 flex flex-col justify-center pl-[10%] pr-8 pt-12 pb-4 relative">
-
+      {/* 타이틀 */}
+      <div className="flex flex-col justify-center pl-[10%] pr-8 pt-12 pb-4 h-full">
         <h1 className="text-6xl md:text-8xl lg:text-[9rem] font-black tracking-tighter text-white leading-none">
           {texts["HEADER_TITLE"] || "Portfolio"}
         </h1>
@@ -87,12 +88,15 @@ export default function PageLayout({ cards, texts, scrollSpeed, initialDms }: Pr
         )}
       </div>
 
-      {/* 우: DM — 경계선 없이 공간에 녹아듦 */}
-      <div className="hidden lg:flex w-[55%] shrink-0">
+      {/* DM — 절대 위치, 타이틀 위에 오버레이 */}
+      <div
+        className="hidden lg:flex absolute inset-y-0"
+        style={{ left: dmLeftOffset, right: dmRightPadding }}
+      >
         <DmPanel initialDms={initialDms} texts={texts} />
       </div>
 
-      </div>{/* end flex-1 row */}
+      </div>{/* end flex-1 */}
 
       {/* 카드 영역 */}
       <div className="border-t border-[#1a1a1a] mb-20">
@@ -168,7 +172,7 @@ export default function PageLayout({ cards, texts, scrollSpeed, initialDms }: Pr
         ) : (
 
           /* ── 그리드 뷰 ── */
-          <div className="pl-[10%] pr-8 pt-7 pb-10">
+          <div className="pl-[10%] pr-[10%] pt-7 pb-10">
             <div
               className="grid gap-4"
               style={{ gridTemplateColumns: "repeat(auto-fill, minmax(280px, 1fr))" }}

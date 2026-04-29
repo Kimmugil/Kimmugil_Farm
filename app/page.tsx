@@ -19,6 +19,8 @@ export default async function Home() {
         initialCards={cards}
         scrollSpeed={config.SCROLL_SPEED}
         initialDms={dms}
+        dmLeftOffset={config.DM_LEFT_OFFSET}
+        dmRightPadding={config.DM_RIGHT_PADDING}
       />
     );
   } catch (err) {

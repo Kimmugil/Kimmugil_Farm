@@ -55,6 +55,8 @@ export async function fetchConfig(): Promise<SiteConfig> {
     META_DESC: map["META_DESC"] ?? "",
     SCROLL_SPEED: parseInt(map["SCROLL_SPEED"] ?? "") || 30,
     DM_ANON_NICKNAME: map["DM_ANON_NICKNAME"] ?? "익명의 농부",
+    DM_LEFT_OFFSET: map["DM_LEFT_OFFSET"] ?? "20%",
+    DM_RIGHT_PADDING: map["DM_RIGHT_PADDING"] ?? "10%",
   };
 }
 
