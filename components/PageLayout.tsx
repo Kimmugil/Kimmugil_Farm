@@ -113,8 +113,8 @@ export default function PageLayout({ cards, texts, scrollSpeed, initialDms }: Pr
         )}
       </div>
 
-      {/* 우: DM 패널 */}
-      <div className="hidden lg:flex w-[340px] xl:w-[380px] shrink-0 border-l border-[#141414]">
+      {/* 우: DM — 경계선 없이 공간에 녹아듦 */}
+      <div className="hidden lg:flex w-[340px] xl:w-[400px] shrink-0">
         <DmPanel initialDms={initialDms} texts={texts} />
       </div>
 
