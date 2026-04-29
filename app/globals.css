@@ -44,6 +44,12 @@ body {
   user-select: none;
 }
 
+/* 세로 마퀴 애니메이션 */
+@keyframes marquee-down {
+  from { transform: translateY(0); }
+  to   { transform: translateY(-33.333%); }
+}
+
 /* 스크롤바 다크 스타일 */
 ::-webkit-scrollbar {
   width: 6px;

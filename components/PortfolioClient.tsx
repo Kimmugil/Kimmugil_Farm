@@ -3,6 +3,7 @@
 import { useState, useCallback } from "react";
 import type { Card, UITexts } from "@/lib/types";
 import LockScreen from "./LockScreen";
+import HeroSection from "./HeroSection";
 import CardGrid from "./CardGrid";
 
 interface Props {
@@ -53,6 +54,7 @@ export default function PortfolioClient({ isOpen, initialTexts, initialCards }: 
 
   return (
     <>
+      <HeroSection cards={cards} texts={texts} />
       <CardGrid cards={cards} texts={texts} />
 
       {/* 동기화 버튼 — 우측 하단 고정 */}

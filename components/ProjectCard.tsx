@@ -5,13 +5,14 @@ import type { Card } from "@/lib/types";
 
 interface Props {
   card: Card;
+  detailsLabel: string;
 }
 
 function isImageUrl(value: string): boolean {
   return /^https?:\/\/.+\.(png|jpg|jpeg|gif|webp|svg|avif)/i.test(value);
 }
 
-export default function ProjectCard({ card }: Props) {
+export default function ProjectCard({ card, detailsLabel }: Props) {
   const descriptions = [card.설명1, card.설명2, card.설명3, card.설명4].filter(Boolean);
 
   const inner = (
@@ -19,7 +20,6 @@ export default function ProjectCard({ card }: Props) {
       className="card-hover relative flex flex-col h-full min-h-[280px] rounded-2xl border border-[#282828] bg-[#141414] p-5 overflow-hidden cursor-pointer"
       role="article"
     >
-      {/* 타이틀 / 서브타이틀 */}
       <div className="z-10">
         <h2 className="text-lg font-bold leading-tight text-white tracking-tight">
           {card.타이틀}
@@ -31,7 +31,6 @@ export default function ProjectCard({ card }: Props) {
         )}
       </div>
 
-      {/* 아이콘 (중앙 확대) */}
       <div className="flex flex-1 items-center justify-center py-6">
         {isImageUrl(card.아이콘) ? (
           <Image
@@ -48,12 +47,13 @@ export default function ProjectCard({ card }: Props) {
         )}
       </div>
 
-      {/* 설명 목록 */}
       {descriptions.length > 0 && (
         <div className="z-10 mt-auto space-y-0.5">
-          <p className="text-[10px] font-semibold uppercase tracking-widest text-[#555555] mb-1.5">
-            DETAILS
-          </p>
+          {detailsLabel && (
+            <p className="text-[10px] font-semibold uppercase tracking-widest text-[#555555] mb-1.5">
+              {detailsLabel}
+            </p>
+          )}
           {descriptions.map((desc, i) => (
             <p key={i} className="text-[12px] font-light text-[#aaaaaa] leading-relaxed">
               {desc}
