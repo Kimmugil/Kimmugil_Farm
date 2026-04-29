@@ -67,32 +67,6 @@ export default function PageLayout({ cards, texts, scrollSpeed, initialDms }: Pr
       {/* 좌: 타이틀 */}
       <div className="flex-1 flex flex-col justify-center pl-[10%] pr-8 pt-12 pb-4 relative">
 
-        {/* 뷰 전환 버튼 — 우측 상단 */}
-        <div className="absolute top-8 right-8 flex items-center gap-2">
-          <button
-            onClick={() => setView("marquee")}
-            title="슬라이드 보기"
-            className={`w-9 h-9 rounded-lg flex items-center justify-center border transition-colors ${
-              view === "marquee"
-                ? "border-[#444444] bg-[#1e1e1e]"
-                : "border-[#1e1e1e] bg-transparent hover:border-[#333333]"
-            }`}
-          >
-            <MarqueeIcon active={view === "marquee"} />
-          </button>
-          <button
-            onClick={() => setView("grid")}
-            title="목록 보기"
-            className={`w-9 h-9 rounded-lg flex items-center justify-center border transition-colors ${
-              view === "grid"
-                ? "border-[#444444] bg-[#1e1e1e]"
-                : "border-[#1e1e1e] bg-transparent hover:border-[#333333]"
-            }`}
-          >
-            <GridIcon active={view === "grid"} />
-          </button>
-        </div>
-
         <h1 className="text-6xl md:text-8xl lg:text-[9rem] font-black tracking-tighter text-white leading-none">
           {texts["HEADER_TITLE"] || "Portfolio"}
         </h1>
@@ -114,7 +88,7 @@ export default function PageLayout({ cards, texts, scrollSpeed, initialDms }: Pr
       </div>
 
       {/* 우: DM — 경계선 없이 공간에 녹아듦 */}
-      <div className="hidden lg:flex w-[340px] xl:w-[400px] shrink-0">
+      <div className="hidden lg:flex w-[420px] xl:w-[500px] shrink-0">
         <DmPanel initialDms={initialDms} texts={texts} />
       </div>
 
@@ -122,6 +96,28 @@ export default function PageLayout({ cards, texts, scrollSpeed, initialDms }: Pr
 
       {/* 카드 영역 */}
       <div className="border-t border-[#1a1a1a] mb-20">
+
+        {/* 뷰 전환 버튼 — 카드 바로 위 우측 */}
+        <div className="flex justify-end px-6 pt-4 pb-0 gap-2">
+          <button
+            onClick={() => setView("marquee")}
+            title="슬라이드 보기"
+            className={`w-8 h-8 rounded-lg flex items-center justify-center border transition-colors ${
+              view === "marquee" ? "border-[#444444] bg-[#1e1e1e]" : "border-[#1e1e1e] hover:border-[#333333]"
+            }`}
+          >
+            <MarqueeIcon active={view === "marquee"} />
+          </button>
+          <button
+            onClick={() => setView("grid")}
+            title="목록 보기"
+            className={`w-8 h-8 rounded-lg flex items-center justify-center border transition-colors ${
+              view === "grid" ? "border-[#444444] bg-[#1e1e1e]" : "border-[#1e1e1e] hover:border-[#333333]"
+            }`}
+          >
+            <GridIcon active={view === "grid"} />
+          </button>
+        </div>
         {cards.length === 0 ? (
           <p className="text-center text-[#555555] py-16 text-sm px-8">
             {texts["EMPTY_MESSAGE"] || "등록된 프로젝트가 없습니다."}

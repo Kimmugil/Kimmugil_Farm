@@ -31,10 +31,10 @@ function Bubble({ msg }: { msg: DmMessage }) {
       }}
     >
       <div className="flex items-baseline gap-2 mb-1">
-        <span className="text-[11px] font-semibold text-[#999999]">{msg.nickname}</span>
-        <span className="text-[10px] text-[#3a3a3a]">{formatTime(msg.timestamp)}</span>
+        <span className="text-[11px] font-semibold text-[#bbbbbb]">{msg.nickname}</span>
+        <span className="text-[10px] text-[#666666]">{formatTime(msg.timestamp)}</span>
       </div>
-      <p className="text-[12px] text-[#cccccc] font-light whitespace-pre-wrap break-words">
+      <p className="text-[12px] text-[#e0e0e0] font-light whitespace-pre-wrap break-words">
         {msg.content}
       </p>
     </div>
@@ -102,7 +102,7 @@ export default function DmPanel({ initialDms, texts }: Props) {
       >
         {dms.length === 0 ? (
           <div className="h-full flex items-end pb-4">
-            <p className="text-[11px] text-[#2a2a2a] leading-relaxed">
+            <p className="text-[11px] text-[#666666] leading-relaxed">
               {t("DM_EMPTY_MSG", "아직 아무도 글을 남기지 않았어요")}
             </p>
           </div>
@@ -122,10 +122,10 @@ export default function DmPanel({ initialDms, texts }: Props) {
               value={nickname}
               onChange={(e) => setNickname(e.target.value.slice(0, 20))}
               placeholder={t("DM_PLACEHOLDER_NICK", "닉네임 (선택)")}
-              className="w-full bg-transparent border-b border-[#1e1e1e] py-1.5 text-xs text-white placeholder-[#2e2e2e] focus:outline-none focus:border-[#333333] transition-colors"
+              className="w-full bg-transparent border-b border-[#2a2a2a] py-1.5 text-xs text-white placeholder-[#555555] focus:outline-none focus:border-[#555555] transition-colors"
             />
             {!nickname && (
-              <p className="text-[10px] text-[#2a2a2a] mt-0.5">
+              <p className="text-[10px] text-[#555555] mt-0.5">
                 {t("DM_ANON_HINT", "비워두면 랜덤 닉네임이 생성됩니다")}
               </p>
             )}
@@ -138,12 +138,12 @@ export default function DmPanel({ initialDms, texts }: Props) {
               onChange={(e) => setContent(e.target.value.slice(0, 200))}
               placeholder={t("DM_PLACEHOLDER_MSG", "남기고 싶은 말을 적어주세요")}
               rows={2}
-              className="flex-1 bg-transparent border-b border-[#1e1e1e] py-1.5 text-xs text-white placeholder-[#2e2e2e] focus:outline-none focus:border-[#333333] transition-colors resize-none"
+              className="flex-1 bg-transparent border-b border-[#2a2a2a] py-1.5 text-xs text-white placeholder-[#555555] focus:outline-none focus:border-[#555555] transition-colors resize-none"
             />
             <button
               type="submit"
               disabled={sending || !content.trim()}
-              className="shrink-0 mb-1 text-[#444444] hover:text-white transition-colors disabled:opacity-20 disabled:cursor-not-allowed"
+              className="shrink-0 mb-1 text-[#666666] hover:text-white transition-colors disabled:opacity-20 disabled:cursor-not-allowed"
               aria-label="전송"
             >
               {sending ? (
@@ -163,7 +163,7 @@ export default function DmPanel({ initialDms, texts }: Props) {
             <p className={`text-[10px] transition-opacity ${statusMsg ? "opacity-100" : "opacity-0"} ${statusMsg.includes("실패") || statusMsg.includes("초 후") ? "text-red-400" : "text-emerald-400"}`}>
               {statusMsg || "·"}
             </p>
-            <p className="text-[10px] text-[#252525]">{content.length}/200</p>
+            <p className="text-[10px] text-[#555555]">{content.length}/200</p>
           </div>
 
         </form>
