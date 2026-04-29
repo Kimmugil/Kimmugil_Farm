@@ -9,6 +9,7 @@ interface Props {
   detailsLabel: string;
   soonLabel: string;
   soonNoUrlMsg: string;
+  disableHover?: boolean;
 }
 
 function isImageUrl(value: string): boolean {
@@ -20,7 +21,7 @@ const BADGE_STYLES: Record<string, string> = {
   UPDATE: "bg-sky-500/20 text-sky-400 border-sky-500/30",
 };
 
-export default function ProjectCard({ card, detailsLabel, soonLabel, soonNoUrlMsg }: Props) {
+export default function ProjectCard({ card, detailsLabel, soonLabel, soonNoUrlMsg, disableHover }: Props) {
   const descriptions = [card.설명1, card.설명2, card.설명3, card.설명4].filter(Boolean);
   const isSoon = card.상태 === "SOON";
   const badgeStyle = card.뱃지 ? BADGE_STYLES[card.뱃지] : null;
@@ -145,7 +146,7 @@ export default function ProjectCard({ card, detailsLabel, soonLabel, soonNoUrlMs
         href={card.URL}
         target="_blank"
         rel="noopener noreferrer"
-        className="card-hover block h-full focus:outline-none focus:ring-2 focus:ring-white/20 rounded-2xl"
+        className={`${disableHover ? "" : "card-hover "}block h-full focus:outline-none focus:ring-2 focus:ring-white/20 rounded-2xl`}
         aria-label={`${card.타이틀} 프로젝트 바로가기`}
       >
         {cardBody}
@@ -153,5 +154,5 @@ export default function ProjectCard({ card, detailsLabel, soonLabel, soonNoUrlMs
     );
   }
 
-  return <div className="card-hover h-full">{cardBody}</div>;
+  return <div className={`${disableHover ? "" : "card-hover "}h-full`}>{cardBody}</div>;
 }
