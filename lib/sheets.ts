@@ -144,7 +144,7 @@ export async function fetchDMs(maxCount = 30): Promise<DmMessage[]> {
 
   const res = await sheets.spreadsheets.values.get({
     spreadsheetId,
-    range: "DM!A:D",
+    range: "DM!A:E",
   });
 
   const rows = res.data.values ?? [];
