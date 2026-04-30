@@ -6,9 +6,10 @@ import type { DmMessage, UITexts } from "@/lib/types";
 interface Props {
   texts: UITexts;
   onDmSent: (msg: DmMessage) => void;
+  onClose?: () => void;
 }
 
-export default function DmForm({ texts, onDmSent }: Props) {
+export default function DmForm({ texts, onDmSent, onClose }: Props) {
   const [nickname, setNickname] = useState("");
   const [content, setContent] = useState("");
   const [sending, setSending] = useState(false);
@@ -57,9 +58,27 @@ export default function DmForm({ texts, onDmSent }: Props) {
   return (
     <form
       onSubmit={handleSend}
-      className="w-64 rounded-2xl p-4"
+      className="w-72 rounded-2xl p-5"
       style={{ background: "#1c1c1c", border: "1px solid #333333" }}
     >
+      {/* 헤더 */}
+      <div className="flex items-center justify-between mb-4">
+        <p className="text-sm font-semibold text-[#cccccc]">
+          {t("DM_MODAL_TITLE", "메시지 남기기")}
+        </p>
+        {onClose && (
+          <button
+            type="button"
+            onClick={onClose}
+            className="text-[#666666] hover:text-[#aaaaaa] transition-colors"
+          >
+            <svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2.5" strokeLinecap="round">
+              <path d="M18 6 6 18M6 6l12 12" />
+            </svg>
+          </button>
+        )}
+      </div>
+
       {/* 닉네임 */}
       <div className="mb-3">
         <label className="block text-xs text-[#aaaaaa] uppercase tracking-widest mb-1.5">
@@ -86,7 +105,7 @@ export default function DmForm({ texts, onDmSent }: Props) {
       </div>
 
       {/* 메시지 */}
-      <div className="mb-3">
+      <div className="mb-4">
         <label className="block text-xs text-[#aaaaaa] uppercase tracking-widest mb-1.5">
           {t("DM_LABEL_MSG", "메시지")}
         </label>
@@ -94,7 +113,7 @@ export default function DmForm({ texts, onDmSent }: Props) {
           value={content}
           onChange={(e) => setContent(e.target.value.slice(0, 200))}
           placeholder={t("DM_PLACEHOLDER_MSG", "남기고 싶은 말을 써주세요")}
-          rows={3}
+          rows={4}
           className={inputCls + " resize-none"}
           style={borderStyle}
           onFocus={(e) => (e.target.style.borderColor = "#666666")}
@@ -112,7 +131,7 @@ export default function DmForm({ texts, onDmSent }: Props) {
           <button
             type="submit"
             disabled={sending || !content.trim()}
-            className="flex items-center gap-1.5 text-[11px] px-2.5 py-1.5 rounded-lg text-[#cccccc] hover:text-white transition-all disabled:opacity-30 disabled:cursor-not-allowed"
+            className="flex items-center gap-1.5 text-[11px] px-3 py-1.5 rounded-lg text-[#cccccc] hover:text-white transition-all disabled:opacity-30 disabled:cursor-not-allowed"
             style={{ background: "#2a2a2a", border: "1px solid #444444" }}
           >
             {sending ? (
