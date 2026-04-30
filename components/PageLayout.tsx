@@ -90,34 +90,32 @@ export default function PageLayout({ cards, texts, scrollSpeed, initialDms, dmMa
         {/* ── 히어로 영역 ── */}
         <section className="flex-1 min-h-0 relative overflow-hidden">
 
-          {/* 타이틀 + DM 버튼 */}
-          <div className="pl-[10%] pr-8 pt-12 pb-4 flex items-start justify-between">
-            <div>
-              <h1 className="text-6xl md:text-8xl lg:text-[9rem] font-black tracking-tighter text-white leading-none">
-                {texts["HEADER_TITLE"] || "Portfolio"}
-              </h1>
-              {texts["HEADER_SUBTITLE"] && (
-                <p className="mt-4 text-base text-[#666666] font-medium tracking-wide">
-                  {texts["HEADER_SUBTITLE"]}
-                </p>
-              )}
-              {(texts["HEADER_DESC_LEFT"] || texts["HEADER_DESC_RIGHT"]) && (
-                <div className="mt-2 flex flex-col sm:flex-row gap-2 max-w-lg">
-                  {texts["HEADER_DESC_LEFT"] && (
-                    <p className="text-xs text-[#444444] leading-relaxed">{texts["HEADER_DESC_LEFT"]}</p>
-                  )}
-                  {texts["HEADER_DESC_RIGHT"] && (
-                    <p className="text-xs text-[#444444] leading-relaxed">{texts["HEADER_DESC_RIGHT"]}</p>
-                  )}
-                </div>
-              )}
-            </div>
+          {/* 타이틀 */}
+          <div className="pl-[10%] pr-8 pt-12 pb-4">
+            <h1 className="text-6xl md:text-8xl lg:text-[9rem] font-black tracking-tighter text-white leading-none">
+              {texts["HEADER_TITLE"] || "Portfolio"}
+            </h1>
+            {texts["HEADER_SUBTITLE"] && (
+              <p className="mt-4 text-base text-[#666666] font-medium tracking-wide">
+                {texts["HEADER_SUBTITLE"]}
+              </p>
+            )}
+            {(texts["HEADER_DESC_LEFT"] || texts["HEADER_DESC_RIGHT"]) && (
+              <div className="mt-2 flex flex-col sm:flex-row gap-2 max-w-lg">
+                {texts["HEADER_DESC_LEFT"] && (
+                  <p className="text-xs text-[#444444] leading-relaxed">{texts["HEADER_DESC_LEFT"]}</p>
+                )}
+                {texts["HEADER_DESC_RIGHT"] && (
+                  <p className="text-xs text-[#444444] leading-relaxed">{texts["HEADER_DESC_RIGHT"]}</p>
+                )}
+              </div>
+            )}
 
             {/* DM 아이콘 버튼 */}
             <button
               onClick={() => setDmOpen(true)}
               title="메시지 남기기"
-              className="mt-1 flex items-center gap-2 px-3 py-2 rounded-xl text-[#888888] hover:text-white transition-all"
+              className="mt-3 flex items-center gap-2 px-3 py-2 rounded-xl text-[#888888] hover:text-white transition-all"
               style={{ background: "#1c1c1c", border: "1px solid #333333" }}
             >
               <DmIcon />
