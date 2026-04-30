@@ -43,15 +43,17 @@ export default function PetZone({
   const activePets = pets.filter((p) => p.active);
 
   // fixedMessage 있으면 항상 그 메시지 표시
-  // 없는 펫에는 최근 방문자 DM 자동 분배
+  // 없는 펫에는 최근 방문자 DM 자동 분배 (fixedMessage와 내용 겹치는 DM 제외)
+  const fixedContents = new Set(activePets.map((p) => p.fixedMessage).filter(Boolean));
   const freePets = activePets.filter((p) => !p.fixedMessage);
-  const assignedDms = activePets.map((pet, i) => {
+  const autoPool = dms.filter((d) => !fixedContents.has(d.content));
+  const assignedDms = activePets.map((pet) => {
     if (pet.fixedMessage) {
       return { nickname: "", content: pet.fixedMessage, timestamp: "" } as DmMessage;
     }
     const freeIdx = freePets.indexOf(pet);
-    const idx = dms.length - freePets.length + freeIdx;
-    return idx >= 0 ? dms[idx] : undefined;
+    const idx = autoPool.length - freePets.length + freeIdx;
+    return idx >= 0 ? autoPool[idx] : undefined;
   });
 
   // px 높이 = font-size(rem) * 16 * 보정계수(이모지 실제 높이)
