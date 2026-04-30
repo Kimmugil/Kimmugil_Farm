@@ -19,8 +19,11 @@ export interface DmPet {
 
 export interface DmMasterConfig {
   maxDms: number;
-  groundHeight: number;
   repulsionRadius: number;
+  petSizeScale: number;   // 이모지 font-size = pet.size * petSizeScale (rem)
+  groundOffset: number;   // 바닥에서 위로 띄우는 px (클리핑 방지)
+  bubbleFontSize: number; // 말풍선 내용 폰트 크기 (px)
+  bubbleMaxWidth: number; // 말풍선 최대 너비 (px)
   pets: DmPet[];
 }
 

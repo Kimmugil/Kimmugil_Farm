@@ -7,6 +7,10 @@ interface Props {
   pets: DmPet[];
   dms: DmMessage[];
   repulsionRadius: number;
+  petSizeScale: number;   // rem = pet.size * petSizeScale
+  groundOffset: number;   // 바닥에서 위로 띄울 px
+  bubbleFontSize: number; // px
+  bubbleMaxWidth: number; // px
 }
 
 interface PetRuntime {
@@ -22,10 +26,12 @@ interface PetRuntime {
   isAirborne: boolean;
 }
 
-const BASE_PX = 16; // 이모지 크기 기준 (px per size unit)
 const GRAVITY = 900;
 
-export default function PetZone({ pets, dms, repulsionRadius }: Props) {
+export default function PetZone({
+  pets, dms, repulsionRadius,
+  petSizeScale, groundOffset, bubbleFontSize, bubbleMaxWidth,
+}: Props) {
   const containerRef = useRef<HTMLDivElement>(null);
   const wrapRefs = useRef<Map<number, HTMLDivElement | null>>(new Map());
   const emojiRefs = useRef<Map<number, HTMLSpanElement | null>>(new Map());
@@ -34,20 +40,20 @@ export default function PetZone({ pets, dms, repulsionRadius }: Props) {
   const lastTimeRef = useRef<number>(0);
 
   const activePets = pets.filter((p) => p.active);
-
   const assignedDms = activePets.map((_, i) => {
     const idx = dms.length - activePets.length + i;
     return idx >= 0 ? dms[idx] : undefined;
   });
 
-  // 초기 위치 — 바닥에 고르게 배치
+  // px 높이 = font-size(rem) * 16 * 보정계수(이모지 실제 높이)
+  const petHeightPx = (size: number) => size * petSizeScale * 16 * 1.1;
+
   useEffect(() => {
     const W = containerRef.current?.clientWidth ?? 800;
     const H = containerRef.current?.clientHeight ?? 200;
 
     runtimeRef.current = activePets.map((pet, i) => {
-      const petPx = pet.size * BASE_PX;
-      const gY = H - petPx;
+      const gY = H - petHeightPx(pet.size) - groundOffset;
       const spread = activePets.length > 1 ? W / activePets.length : W * 0.5;
       return {
         x: spread * i + spread * 0.3 + Math.random() * spread * 0.4,
@@ -63,9 +69,8 @@ export default function PetZone({ pets, dms, repulsionRadius }: Props) {
       };
     });
     // eslint-disable-next-line react-hooks/exhaustive-deps
-  }, [activePets.length]);
+  }, [activePets.length, groundOffset, petSizeScale]);
 
-  // rAF 루프
   useEffect(() => {
     if (activePets.length === 0) return;
     lastTimeRef.current = 0;
@@ -87,10 +92,8 @@ export default function PetZone({ pets, dms, repulsionRadius }: Props) {
       for (let i = 0; i < states.length; i++) {
         const s = states[i];
         const pet = activePets[i];
-        const petPx = pet.size * BASE_PX;
-        const groundY = H - petPx;
+        const groundY = H - petHeightPx(pet.size) - groundOffset;
 
-        // ── 상태 타이머 ──────────────────────────────────
         s.animTimer -= rawMs;
         if (s.animTimer <= 0 && !s.isAirborne) {
           const r = Math.random();
@@ -113,7 +116,6 @@ export default function PetZone({ pets, dms, repulsionRadius }: Props) {
           }
         }
 
-        // ── 이동 ─────────────────────────────────────────
         if (s.isAirborne) {
           s.vy += GRAVITY * dt;
           s.x += s.vx * dt * 0.4;
@@ -130,14 +132,12 @@ export default function PetZone({ pets, dms, repulsionRadius }: Props) {
           s.y = groundY;
         }
 
-        // ── 좌우 경계 ─────────────────────────────────────
-        const maxX = W - petPx * 2;
+        const petW = petHeightPx(pet.size) * 1.5;
+        const maxX = W - petW;
         if (s.x < 0)    { s.x = 0;    s.vx = Math.abs(s.vx); }
         if (s.x > maxX) { s.x = maxX; s.vx = -Math.abs(s.vx); }
-
         if (Math.abs(s.vx) > 0.5) s.facingRight = s.vx > 0;
 
-        // ── 수평 반발 ─────────────────────────────────────
         for (let j = i + 1; j < states.length; j++) {
           const o = states[j];
           const dx = s.x - o.x;
@@ -154,7 +154,6 @@ export default function PetZone({ pets, dms, repulsionRadius }: Props) {
           }
         }
 
-        // ── DOM 업데이트 ──────────────────────────────────
         const wrap = wrapRefs.current.get(pet.id);
         const emoji = emojiRefs.current.get(pet.id);
         if (wrap) wrap.style.transform = `translate(${s.x}px,${s.y}px)`;
@@ -175,7 +174,7 @@ export default function PetZone({ pets, dms, repulsionRadius }: Props) {
     rafRef.current = requestAnimationFrame(tick);
     return () => cancelAnimationFrame(rafRef.current);
     // eslint-disable-next-line react-hooks/exhaustive-deps
-  }, [activePets.length, repulsionRadius]);
+  }, [activePets.length, repulsionRadius, groundOffset, petSizeScale]);
 
   if (activePets.length === 0) return null;
 
@@ -183,7 +182,8 @@ export default function PetZone({ pets, dms, repulsionRadius }: Props) {
     <div ref={containerRef} className="relative w-full h-full">
       {activePets.map((pet, i) => {
         const dm = assignedDms[i];
-        const petPx = pet.size * BASE_PX;
+        const petPx = petHeightPx(pet.size);
+        const fontSize = `${pet.size * petSizeScale}rem`;
 
         return (
           <div
@@ -197,7 +197,7 @@ export default function PetZone({ pets, dms, repulsionRadius }: Props) {
               <div
                 className="absolute"
                 style={{
-                  bottom: petPx + 8,
+                  bottom: petPx + groundOffset + 6,
                   left: "50%",
                   transform: "translateX(-50%)",
                   background: "rgba(20,20,20,0.92)",
@@ -205,45 +205,33 @@ export default function PetZone({ pets, dms, repulsionRadius }: Props) {
                   borderRadius: 10,
                   padding: "6px 10px",
                   width: "max-content",
-                  maxWidth: 160,
+                  maxWidth: bubbleMaxWidth,
                   zIndex: 20,
                   backdropFilter: "blur(6px)",
                   WebkitBackdropFilter: "blur(6px)",
                 }}
               >
-                <p className="text-[10px] text-[#888888] mb-0.5 max-w-[140px] truncate font-medium">
+                <p style={{ fontSize: Math.max(bubbleFontSize - 2, 9), color: "#999999", marginBottom: 2, maxWidth: bubbleMaxWidth - 20, overflow: "hidden", textOverflow: "ellipsis", whiteSpace: "nowrap", fontWeight: 500 }}>
                   {dm.nickname}
                 </p>
-                <p
-                  className="text-[12px] text-[#e0e0e0] break-words leading-snug"
-                  style={{ fontWeight: 300, maxWidth: 140 }}
-                >
+                <p style={{ fontSize: bubbleFontSize, color: "#e0e0e0", fontWeight: 300, maxWidth: bubbleMaxWidth - 20, wordBreak: "break-word", lineHeight: 1.4 }}>
                   {dm.content.length > 80 ? dm.content.slice(0, 80) + "…" : dm.content}
                 </p>
-                <div
-                  style={{
-                    position: "absolute",
-                    bottom: -5,
-                    left: "50%",
-                    transform: "translateX(-50%)",
-                    width: 0,
-                    height: 0,
-                    borderLeft: "5px solid transparent",
-                    borderRight: "5px solid transparent",
-                    borderTop: "5px solid rgba(20,20,20,0.92)",
-                  }}
-                />
+                <div style={{
+                  position: "absolute", bottom: -5, left: "50%",
+                  transform: "translateX(-50%)",
+                  width: 0, height: 0,
+                  borderLeft: "5px solid transparent",
+                  borderRight: "5px solid transparent",
+                  borderTop: "5px solid rgba(20,20,20,0.92)",
+                }} />
               </div>
             )}
 
             {/* 이모지 */}
             <span
               ref={(el) => { emojiRefs.current.set(pet.id, el); }}
-              style={{
-                fontSize: `${pet.size * 0.9}rem`,
-                display: "inline-block",
-                lineHeight: 1,
-              }}
+              style={{ fontSize, display: "inline-block", lineHeight: 1 }}
             >
               {pet.emoji}
             </span>

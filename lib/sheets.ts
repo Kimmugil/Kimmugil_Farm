@@ -170,7 +170,11 @@ export async function fetchDmMaster(): Promise<DmMasterConfig> {
 
     const rows = res.data.values ?? [];
     const settings: Record<string, string> = {};
-    const SETTING_KEYS = new Set(["MAX_DMS", "GROUND_HEIGHT", "REPULSION_RADIUS"]);
+    const SETTING_KEYS = new Set([
+      "MAX_DMS", "REPULSION_RADIUS",
+      "PET_SIZE_SCALE", "GROUND_OFFSET",
+      "BUBBLE_FONT_SIZE", "BUBBLE_MAX_WIDTH",
+    ]);
     let petHeaderFound = false;
     const pets: DmMasterConfig["pets"] = [];
 
@@ -195,13 +199,21 @@ export async function fetchDmMaster(): Promise<DmMasterConfig> {
     }
 
     return {
-      maxDms: parseInt(settings["MAX_DMS"] ?? "10") || 10,
-      groundHeight: parseInt(settings["GROUND_HEIGHT"] ?? "200") || 200,
-      repulsionRadius: parseInt(settings["REPULSION_RADIUS"] ?? "70") || 70,
+      maxDms:         parseInt(settings["MAX_DMS"]          ?? "10")  || 10,
+      repulsionRadius:parseInt(settings["REPULSION_RADIUS"] ?? "70")  || 70,
+      petSizeScale:   parseFloat(settings["PET_SIZE_SCALE"] ?? "0.7") || 0.7,
+      groundOffset:   parseInt(settings["GROUND_OFFSET"]    ?? "8")   || 8,
+      bubbleFontSize: parseInt(settings["BUBBLE_FONT_SIZE"] ?? "12")  || 12,
+      bubbleMaxWidth: parseInt(settings["BUBBLE_MAX_WIDTH"] ?? "160") || 160,
       pets,
     };
   } catch {
-    return { maxDms: 10, groundHeight: 200, repulsionRadius: 70, pets: [] };
+    return {
+      maxDms: 10, repulsionRadius: 70,
+      petSizeScale: 0.7, groundOffset: 8,
+      bubbleFontSize: 12, bubbleMaxWidth: 160,
+      pets: [],
+    };
   }
 }
 

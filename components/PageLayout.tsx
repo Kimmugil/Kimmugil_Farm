@@ -106,6 +106,10 @@ export default function PageLayout({ cards, texts, scrollSpeed, initialDms, dmMa
               pets={dmMaster.pets}
               dms={dms}
               repulsionRadius={dmMaster.repulsionRadius}
+              petSizeScale={dmMaster.petSizeScale}
+              groundOffset={dmMaster.groundOffset}
+              bubbleFontSize={dmMaster.bubbleFontSize}
+              bubbleMaxWidth={dmMaster.bubbleMaxWidth}
             />
           </div>
 
