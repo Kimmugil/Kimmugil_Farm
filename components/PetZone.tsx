@@ -6,16 +6,14 @@ import type { DmPet, DmMessage } from "@/lib/types";
 interface Props {
   pets: DmPet[];
   dms: DmMessage[];
-  groundHeight: number;
   repulsionRadius: number;
 }
 
 interface PetRuntime {
   x: number;
-  y: number;       // 항상 groundY에 고정, 점프 시에만 변화
-  groundY: number; // 이 펫의 "바닥" y좌표
+  y: number;
   vx: number;
-  vy: number;      // 점프 시에만 사용
+  vy: number;
   facingRight: boolean;
   animType: "walk" | "shake" | "jump";
   animTimer: number;
@@ -24,10 +22,10 @@ interface PetRuntime {
   isAirborne: boolean;
 }
 
-const BASE_PX = 22;
-const GRAVITY = 900; // px/s² — 점프 후 빠르게 바닥으로
+const BASE_PX = 16; // 이모지 크기 기준 (px per size unit)
+const GRAVITY = 900;
 
-export default function PetZone({ pets, dms, groundHeight, repulsionRadius }: Props) {
+export default function PetZone({ pets, dms, repulsionRadius }: Props) {
   const containerRef = useRef<HTMLDivElement>(null);
   const wrapRefs = useRef<Map<number, HTMLDivElement | null>>(new Map());
   const emojiRefs = useRef<Map<number, HTMLSpanElement | null>>(new Map());
@@ -42,18 +40,18 @@ export default function PetZone({ pets, dms, groundHeight, repulsionRadius }: Pr
     return idx >= 0 ? dms[idx] : undefined;
   });
 
-  // 초기 위치 설정 — 모두 바닥에 고르게 배치
+  // 초기 위치 — 바닥에 고르게 배치
   useEffect(() => {
     const W = containerRef.current?.clientWidth ?? 800;
+    const H = containerRef.current?.clientHeight ?? 200;
 
     runtimeRef.current = activePets.map((pet, i) => {
       const petPx = pet.size * BASE_PX;
-      const gY = groundHeight - petPx;
+      const gY = H - petPx;
       const spread = activePets.length > 1 ? W / activePets.length : W * 0.5;
       return {
         x: spread * i + spread * 0.3 + Math.random() * spread * 0.4,
         y: gY,
-        groundY: gY,
         vx: (Math.random() > 0.5 ? 1 : -1) * pet.speed * (0.6 + Math.random() * 0.5),
         vy: 0,
         facingRight: Math.random() > 0.5,
@@ -65,9 +63,9 @@ export default function PetZone({ pets, dms, groundHeight, repulsionRadius }: Pr
       };
     });
     // eslint-disable-next-line react-hooks/exhaustive-deps
-  }, [activePets.length, groundHeight]);
+  }, [activePets.length]);
 
-  // rAF 루프 — 바닥 고정 이동 + 점프 물리
+  // rAF 루프
   useEffect(() => {
     if (activePets.length === 0) return;
     lastTimeRef.current = 0;
@@ -83,30 +81,29 @@ export default function PetZone({ pets, dms, groundHeight, repulsionRadius }: Pr
       const dt = Math.min(rawMs / 1000, 0.05);
 
       const W = containerRef.current?.clientWidth ?? 800;
+      const H = containerRef.current?.clientHeight ?? 200;
       const states = runtimeRef.current;
 
       for (let i = 0; i < states.length; i++) {
         const s = states[i];
         const pet = activePets[i];
         const petPx = pet.size * BASE_PX;
+        const groundY = H - petPx;
 
         // ── 상태 타이머 ──────────────────────────────────
         s.animTimer -= rawMs;
         if (s.animTimer <= 0 && !s.isAirborne) {
           const r = Math.random();
           if (r < 0.06) {
-            // 부들부들
             s.animType = "shake";
             s.shakePhase = 0;
             s.animTimer = 300 + Math.random() * 500;
           } else if (r < 0.10) {
-            // 점프 (드물게)
             s.animType = "jump";
             s.vy = -(s.speed * 2.8 + 100);
             s.isAirborne = true;
-            s.animTimer = 3000; // 안전 타이머
+            s.animTimer = 3000;
           } else {
-            // 방향 전환 (수평만)
             s.animType = "walk";
             s.animTimer = 1500 + Math.random() * 3000;
             if (Math.random() < 0.5) {
@@ -118,34 +115,29 @@ export default function PetZone({ pets, dms, groundHeight, repulsionRadius }: Pr
 
         // ── 이동 ─────────────────────────────────────────
         if (s.isAirborne) {
-          // 점프 물리: 중력 적용
           s.vy += GRAVITY * dt;
           s.x += s.vx * dt * 0.4;
           s.y += s.vy * dt;
-
-          if (s.y >= s.groundY) {
-            // 착지
-            s.y = s.groundY;
+          if (s.y >= groundY) {
+            s.y = groundY;
             s.vy = 0;
             s.isAirborne = false;
             s.animType = "walk";
             s.animTimer = 800 + Math.random() * 1500;
           }
         } else {
-          // 평소: 수평만 이동, y는 바닥에 고정
           s.x += s.vx * dt;
-          s.y = s.groundY;
+          s.y = groundY;
         }
 
-        // ── 좌우 경계 반사 ────────────────────────────────
+        // ── 좌우 경계 ─────────────────────────────────────
         const maxX = W - petPx * 2;
         if (s.x < 0)    { s.x = 0;    s.vx = Math.abs(s.vx); }
         if (s.x > maxX) { s.x = maxX; s.vx = -Math.abs(s.vx); }
 
-        // ── 바라보는 방향 ─────────────────────────────────
         if (Math.abs(s.vx) > 0.5) s.facingRight = s.vx > 0;
 
-        // ── 수평 충돌 반발 ────────────────────────────────
+        // ── 수평 반발 ─────────────────────────────────────
         for (let j = i + 1; j < states.length; j++) {
           const o = states[j];
           const dx = s.x - o.x;
@@ -162,19 +154,15 @@ export default function PetZone({ pets, dms, groundHeight, repulsionRadius }: Pr
           }
         }
 
-        // ── DOM 직접 업데이트 ─────────────────────────────
+        // ── DOM 업데이트 ──────────────────────────────────
         const wrap = wrapRefs.current.get(pet.id);
         const emoji = emojiRefs.current.get(pet.id);
-
-        if (wrap) {
-          wrap.style.transform = `translate(${s.x}px,${s.y}px)`;
-        }
+        if (wrap) wrap.style.transform = `translate(${s.x}px,${s.y}px)`;
         if (emoji) {
           const flipX = s.facingRight ? 1 : -1;
           if (s.animType === "shake" && !s.isAirborne) {
             s.shakePhase += dt * 28;
-            const shakeX = Math.sin(s.shakePhase) * 2.5;
-            emoji.style.transform = `scaleX(${flipX}) translateX(${shakeX}px)`;
+            emoji.style.transform = `scaleX(${flipX}) translateX(${Math.sin(s.shakePhase) * 2.5}px)`;
           } else {
             emoji.style.transform = `scaleX(${flipX})`;
           }
@@ -187,16 +175,12 @@ export default function PetZone({ pets, dms, groundHeight, repulsionRadius }: Pr
     rafRef.current = requestAnimationFrame(tick);
     return () => cancelAnimationFrame(rafRef.current);
     // eslint-disable-next-line react-hooks/exhaustive-deps
-  }, [activePets.length, groundHeight, repulsionRadius]);
+  }, [activePets.length, repulsionRadius]);
 
   if (activePets.length === 0) return null;
 
   return (
-    <div
-      ref={containerRef}
-      className="relative w-full"
-      style={{ height: groundHeight }}
-    >
+    <div ref={containerRef} className="relative w-full h-full">
       {activePets.map((pet, i) => {
         const dm = assignedDms[i];
         const petPx = pet.size * BASE_PX;
@@ -208,35 +192,34 @@ export default function PetZone({ pets, dms, groundHeight, repulsionRadius }: Pr
             className="absolute top-0 left-0 pointer-events-none select-none"
             style={{ willChange: "transform" }}
           >
-            {/* 말풍선 — 캐릭터 머리 위 */}
+            {/* 말풍선 */}
             {dm && (
               <div
                 className="absolute"
                 style={{
-                  bottom: petPx + 6,
+                  bottom: petPx + 8,
                   left: "50%",
                   transform: "translateX(-50%)",
-                  background: "rgba(16,16,16,0.9)",
-                  border: "1px solid rgba(255,255,255,0.07)",
+                  background: "rgba(20,20,20,0.92)",
+                  border: "1px solid rgba(255,255,255,0.1)",
                   borderRadius: 10,
-                  padding: "5px 9px",
+                  padding: "6px 10px",
                   width: "max-content",
-                  maxWidth: 150,
+                  maxWidth: 160,
                   zIndex: 20,
-                  backdropFilter: "blur(4px)",
-                  WebkitBackdropFilter: "blur(4px)",
+                  backdropFilter: "blur(6px)",
+                  WebkitBackdropFilter: "blur(6px)",
                 }}
               >
-                <p className="text-[9px] text-[#666666] mb-0.5 max-w-[132px] truncate">
+                <p className="text-[10px] text-[#888888] mb-0.5 max-w-[140px] truncate font-medium">
                   {dm.nickname}
                 </p>
                 <p
-                  className="text-[10px] text-[#cccccc] break-words leading-snug"
-                  style={{ fontWeight: 300, maxWidth: 132 }}
+                  className="text-[12px] text-[#e0e0e0] break-words leading-snug"
+                  style={{ fontWeight: 300, maxWidth: 140 }}
                 >
-                  {dm.content.length > 60 ? dm.content.slice(0, 60) + "…" : dm.content}
+                  {dm.content.length > 80 ? dm.content.slice(0, 80) + "…" : dm.content}
                 </p>
-                {/* 꼬리 */}
                 <div
                   style={{
                     position: "absolute",
@@ -247,17 +230,17 @@ export default function PetZone({ pets, dms, groundHeight, repulsionRadius }: Pr
                     height: 0,
                     borderLeft: "5px solid transparent",
                     borderRight: "5px solid transparent",
-                    borderTop: "5px solid rgba(16,16,16,0.9)",
+                    borderTop: "5px solid rgba(20,20,20,0.92)",
                   }}
                 />
               </div>
             )}
 
-            {/* 이모지 캐릭터 */}
+            {/* 이모지 */}
             <span
               ref={(el) => { emojiRefs.current.set(pet.id, el); }}
               style={{
-                fontSize: `${pet.size * 1.2}rem`,
+                fontSize: `${pet.size * 0.9}rem`,
                 display: "inline-block",
                 lineHeight: 1,
               }}

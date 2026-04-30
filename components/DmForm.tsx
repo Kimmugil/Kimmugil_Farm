@@ -54,26 +54,28 @@ export default function DmForm({ texts, onDmSent }: Props) {
   return (
     <form
       onSubmit={handleSend}
-      className="mt-6 w-64 bg-[#111111] border border-[#222222] rounded-2xl p-4"
+      className="w-64 bg-[#141414] border border-[#2a2a2a] rounded-2xl p-4"
     >
       {/* 닉네임 */}
       <div className="mb-3">
-        <label className="block text-[10px] text-[#3a3a3a] uppercase tracking-widest mb-1.5">
+        <label className="block text-[11px] text-[#666666] uppercase tracking-widest mb-1.5">
           {t("DM_LABEL_NICK", "닉네임")}
-          <span className="ml-1 normal-case tracking-normal">{t("DM_OPTIONAL", "(선택)")}</span>
+          <span className="ml-1 normal-case tracking-normal text-[#444444]">
+            {t("DM_OPTIONAL", "(선택)")}
+          </span>
         </label>
         <input
           type="text"
           value={nickname}
           onChange={(e) => setNickname(e.target.value.slice(0, 20))}
           placeholder={t("DM_PLACEHOLDER_NICK", "비워두면 랜덤 생성")}
-          className="w-full bg-transparent border-b border-[#262626] py-1.5 text-[11px] text-white placeholder-[#383838] focus:outline-none focus:border-[#444444] transition-colors"
+          className="w-full bg-transparent border-b border-[#333333] py-1.5 text-sm text-white placeholder-[#555555] focus:outline-none focus:border-[#555555] transition-colors"
         />
       </div>
 
       {/* 메시지 */}
       <div className="mb-3">
-        <label className="block text-[10px] text-[#3a3a3a] uppercase tracking-widest mb-1.5">
+        <label className="block text-[11px] text-[#666666] uppercase tracking-widest mb-1.5">
           {t("DM_LABEL_MSG", "메시지")}
         </label>
         <textarea
@@ -81,21 +83,21 @@ export default function DmForm({ texts, onDmSent }: Props) {
           onChange={(e) => setContent(e.target.value.slice(0, 200))}
           placeholder={t("DM_PLACEHOLDER_MSG", "남기고 싶은 말을 써주세요")}
           rows={3}
-          className="w-full bg-transparent border-b border-[#262626] py-1.5 text-[11px] text-white placeholder-[#383838] focus:outline-none focus:border-[#444444] transition-colors resize-none"
+          className="w-full bg-transparent border-b border-[#333333] py-1.5 text-sm text-white placeholder-[#555555] focus:outline-none focus:border-[#555555] transition-colors resize-none"
         />
       </div>
 
       {/* 하단 */}
       <div className="flex items-center justify-between gap-2">
-        <p className={`text-[10px] min-w-0 truncate transition-opacity ${statusMsg ? "opacity-100" : "opacity-0"} ${isError ? "text-red-400" : "text-emerald-400"}`}>
+        <p className={`text-[11px] min-w-0 truncate transition-opacity ${statusMsg ? "opacity-100" : "opacity-0"} ${isError ? "text-red-400" : "text-emerald-400"}`}>
           {statusMsg || "·"}
         </p>
         <div className="flex items-center gap-2 shrink-0">
-          <span className="text-[10px] text-[#2e2e2e]">{content.length}/200</span>
+          <span className="text-[11px] text-[#444444]">{content.length}/200</span>
           <button
             type="submit"
             disabled={sending || !content.trim()}
-            className="flex items-center gap-1.5 text-[10px] px-2.5 py-1.5 rounded-lg bg-[#1a1a1a] border border-[#282828] text-[#666666] hover:text-white hover:border-[#444444] transition-all disabled:opacity-25 disabled:cursor-not-allowed"
+            className="flex items-center gap-1.5 text-[11px] px-2.5 py-1.5 rounded-lg bg-[#1e1e1e] border border-[#333333] text-[#888888] hover:text-white hover:border-[#555555] transition-all disabled:opacity-30 disabled:cursor-not-allowed"
           >
             {sending ? (
               <svg className="animate-spin" width="10" height="10" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2.5">

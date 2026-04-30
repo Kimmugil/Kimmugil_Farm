@@ -37,8 +37,7 @@ function GridIcon({ active }: { active: boolean }) {
   );
 }
 
-// 마퀴 뷰와 그리드 뷰가 동일한 높이를 유지하도록 고정 (뷰 전환 시 히어로 크기 변화 방지)
-const CARD_AREA_H = 336; // py-7(56) + 카드 min-h(280)
+const CARD_AREA_H = 336;
 
 export default function PageLayout({ cards, texts, scrollSpeed, initialDms, dmMaster }: Props) {
   const [view, setView] = useState<"marquee" | "grid">("marquee");
@@ -68,16 +67,16 @@ export default function PageLayout({ cards, texts, scrollSpeed, initialDms, dmMa
   return (
     <main className="min-h-screen flex flex-col overflow-hidden">
 
-      {/* ── 히어로 영역 (flex-1 — 카드 영역 제외한 나머지를 채움) ── */}
+      {/* ── 히어로 영역 ── */}
       <section className="flex-1 min-h-0 flex flex-col overflow-hidden">
 
-        {/* 타이틀 + DM 폼 */}
-        <div className="flex-1 min-h-0 flex flex-col justify-start pl-[10%] pr-8 pt-12 overflow-hidden">
+        {/* 타이틀 */}
+        <div className="flex-shrink-0 pl-[10%] pr-8 pt-12 pb-4">
           <h1 className="text-6xl md:text-8xl lg:text-[9rem] font-black tracking-tighter text-white leading-none">
             {texts["HEADER_TITLE"] || "Portfolio"}
           </h1>
           {texts["HEADER_SUBTITLE"] && (
-            <p className="mt-4 text-sm text-[#555555] font-medium tracking-wide">
+            <p className="mt-4 text-base text-[#666666] font-medium tracking-wide">
               {texts["HEADER_SUBTITLE"]}
             </p>
           )}
@@ -91,25 +90,32 @@ export default function PageLayout({ cards, texts, scrollSpeed, initialDms, dmMa
               )}
             </div>
           )}
-
-          {/* DM 폼 — 타이틀 바로 아래 왼쪽 */}
-          <DmForm texts={texts} onDmSent={handleDmSent} />
         </div>
 
-        {/* 펫 존 — 히어로 하단, 구분선 바로 위 "땅" */}
-        <PetZone
-          pets={dmMaster.pets}
-          dms={dms}
-          groundHeight={dmMaster.groundHeight}
-          repulsionRadius={dmMaster.repulsionRadius}
-        />
+        {/* ── 좌: DM 폼 / 우: 펫 존 — 한 행 ── */}
+        <div className="flex-1 min-h-0 flex overflow-hidden">
+
+          {/* 좌: DM 폼 */}
+          <div className="flex-shrink-0 pl-[10%] pr-6 pt-3 pb-4 flex items-start">
+            <DmForm texts={texts} onDmSent={handleDmSent} />
+          </div>
+
+          {/* 우: 펫 존 (남은 너비 전체) */}
+          <div className="flex-1 min-h-0 relative">
+            <PetZone
+              pets={dmMaster.pets}
+              dms={dms}
+              repulsionRadius={dmMaster.repulsionRadius}
+            />
+          </div>
+
+        </div>
 
       </section>
 
-      {/* ── 카드 영역 (높이 고정 — 뷰 전환해도 히어로가 움직이지 않음) ── */}
+      {/* ── 카드 영역 (높이 고정) ── */}
       <div className="border-t border-[#1a1a1a]">
 
-        {/* 뷰 전환 버튼 */}
         <div className="flex justify-start pl-[10%] pt-4 pb-0 gap-2">
           <button
             onClick={() => setView("marquee")}
@@ -131,7 +137,6 @@ export default function PageLayout({ cards, texts, scrollSpeed, initialDms, dmMa
           </button>
         </div>
 
-        {/* 카드 컨텐츠 — 두 뷰 모두 동일한 높이 박스 안에서 렌더링 */}
         {cards.length === 0 ? (
           <p className="text-center text-[#555555] py-16 text-sm px-8">
             {texts["EMPTY_MESSAGE"] || "등록된 프로젝트가 없습니다."}
@@ -139,8 +144,6 @@ export default function PageLayout({ cards, texts, scrollSpeed, initialDms, dmMa
         ) : (
           <div style={{ height: CARD_AREA_H }}>
             {view === "marquee" ? (
-
-              /* ── 슬라이드 뷰 ── */
               <div
                 className="h-full overflow-hidden py-7"
                 style={{
@@ -180,10 +183,7 @@ export default function PageLayout({ cards, texts, scrollSpeed, initialDms, dmMa
                   ))}
                 </div>
               </div>
-
             ) : (
-
-              /* ── 그리드 뷰 — 같은 높이 박스 안에서 스크롤 ── */
               <div className="h-full overflow-y-auto">
                 <div
                   className="grid gap-4 pl-[10%] pr-[10%] pt-7 pb-10"
@@ -200,13 +200,11 @@ export default function PageLayout({ cards, texts, scrollSpeed, initialDms, dmMa
                   ))}
                 </div>
               </div>
-
             )}
           </div>
         )}
       </div>
 
-      {/* 푸터 */}
       {texts["FOOTER_TEXT"] && (
         <div className="px-8 md:px-16 py-4 border-t border-[#141414]">
           <p className="text-xs text-[#2e2e2e] text-right">{texts["FOOTER_TEXT"]}</p>
