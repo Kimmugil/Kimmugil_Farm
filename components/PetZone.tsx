@@ -42,15 +42,22 @@ export default function PetZone({
 
   const activePets = pets.filter((p) => p.active);
 
-  // 고정 메시지가 있으면 항상 그걸 표시, 없으면 최근 방문자 DM을 순서대로 할당
-  const dmOnlyPets = activePets.filter((p) => !p.fixedMessage);
+  // petNo가 지정된 DM → 해당 펫에 가장 최근 메시지 배정
+  // petNo 없는 DM → 배정 안 된 펫들에게 순서대로 자동 분배
+  const taggedDms = dms.filter((d) => d.petNo != null);
+  const untaggedDms = dms.filter((d) => d.petNo == null);
+
   const assignedDms = activePets.map((pet, i) => {
-    if (pet.fixedMessage) {
-      return { nickname: "", content: pet.fixedMessage, timestamp: "" } as DmMessage;
-    }
-    const dmIdx = dmOnlyPets.indexOf(pet);
-    const idx = dms.length - dmOnlyPets.length + dmIdx;
-    return idx >= 0 ? dms[idx] : undefined;
+    // 이 펫에 명시적으로 지정된 DM 중 가장 최근 것
+    const pinned = taggedDms.filter((d) => d.petNo === pet.id);
+    if (pinned.length > 0) return pinned[pinned.length - 1];
+
+    // 자동 분배: petNo 없는 펫들 중 몇 번째인지 계산
+    const untaggedPetIdx = activePets.slice(0, i + 1).filter(
+      (p) => !taggedDms.some((d) => d.petNo === p.id)
+    ).length - 1;
+    const idx = untaggedDms.length - (activePets.filter(p => !taggedDms.some(d => d.petNo === p.id)).length) + untaggedPetIdx;
+    return idx >= 0 ? untaggedDms[idx] : undefined;
   });
 
   // px 높이 = font-size(rem) * 16 * 보정계수(이모지 실제 높이)

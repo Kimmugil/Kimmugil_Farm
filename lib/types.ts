@@ -32,6 +32,7 @@ export interface DmMessage {
   nickname: string;
   content: string;
   timestamp: string;
+  petNo?: number; // DM 시트 E열: 표시할 펫 번호 (1, 2, 3...)
 }
 
 export interface UITexts {
