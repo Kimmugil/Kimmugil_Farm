@@ -15,6 +15,7 @@ export interface DmPet {
   size: number;    // 1.0 = base (~22px)
   speed: number;  // px/s
   active: boolean;
+  fixedMessage?: string; // 항상 표시할 고정 메시지 (없으면 방문자 DM 사용)
 }
 
 export interface DmMasterConfig {

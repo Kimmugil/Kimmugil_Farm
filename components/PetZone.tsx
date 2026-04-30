@@ -41,8 +41,15 @@ export default function PetZone({
   const lastTimeRef = useRef<number>(0);
 
   const activePets = pets.filter((p) => p.active);
-  const assignedDms = activePets.map((_, i) => {
-    const idx = dms.length - activePets.length + i;
+
+  // 고정 메시지가 있으면 항상 그걸 표시, 없으면 최근 방문자 DM을 순서대로 할당
+  const dmOnlyPets = activePets.filter((p) => !p.fixedMessage);
+  const assignedDms = activePets.map((pet, i) => {
+    if (pet.fixedMessage) {
+      return { nickname: "", content: pet.fixedMessage, timestamp: "" } as DmMessage;
+    }
+    const dmIdx = dmOnlyPets.indexOf(pet);
+    const idx = dms.length - dmOnlyPets.length + dmIdx;
     return idx >= 0 ? dms[idx] : undefined;
   });
 
@@ -220,9 +227,11 @@ export default function PetZone({
                   WebkitBackdropFilter: "blur(6px)",
                 }}
               >
-                <p style={{ fontSize: Math.max(bubbleFontSize - 2, 9), color: "#999999", marginBottom: 2, maxWidth: bubbleMaxWidth - 20, overflow: "hidden", textOverflow: "ellipsis", whiteSpace: "nowrap", fontWeight: 500 }}>
-                  {dm.nickname}
-                </p>
+                {dm.nickname && (
+                  <p style={{ fontSize: Math.max(bubbleFontSize - 2, 9), color: "#999999", marginBottom: 2, maxWidth: bubbleMaxWidth - 20, overflow: "hidden", textOverflow: "ellipsis", whiteSpace: "nowrap", fontWeight: 500 }}>
+                    {dm.nickname}
+                  </p>
+                )}
                 <p style={{ fontSize: bubbleFontSize, color: "#e0e0e0", fontWeight: 300, maxWidth: bubbleMaxWidth - 20, wordBreak: "break-word", lineHeight: 1.4 }}>
                   {dm.content.length > 80 ? dm.content.slice(0, 80) + "…" : dm.content}
                 </p>

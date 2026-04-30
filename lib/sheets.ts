@@ -188,12 +188,14 @@ export async function fetchDmMaster(): Promise<DmMasterConfig> {
         }
       } else {
         if (!key) continue;
+        const fixedMsg = (row[4] ?? "").trim();
         pets.push({
           id: pets.length + 1,
           emoji: key,
           size: parseFloat(row[1] ?? "1") || 1,
           speed: parseFloat(row[2] ?? "50") || 50,
           active: (row[3] ?? "true").toLowerCase() !== "false",
+          ...(fixedMsg ? { fixedMessage: fixedMsg } : {}),
         });
       }
     }
