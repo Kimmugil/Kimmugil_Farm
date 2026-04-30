@@ -92,16 +92,17 @@ export default function PageLayout({ cards, texts, scrollSpeed, initialDms, dmMa
           )}
         </div>
 
-        {/* ── 좌: DM 폼 / 우: 펫 존 — 한 행 ── */}
-        <div className="flex-1 min-h-0 flex overflow-hidden">
+        {/* ── 좌: DM 폼 / 우: 펫 존 ── */}
+        {/* 모바일: DM 폼만 전체 너비 | 데스크톱(lg+): 좌우 한 행 */}
+        <div className="flex-1 min-h-0 flex flex-col lg:flex-row overflow-hidden">
 
-          {/* 좌: DM 폼 */}
+          {/* DM 폼 */}
           <div className="flex-shrink-0 pl-[10%] pr-6 pt-3 pb-4 flex items-start">
             <DmForm texts={texts} onDmSent={handleDmSent} />
           </div>
 
-          {/* 우: 펫 존 (남은 너비 전체) */}
-          <div className="flex-1 min-h-0 relative">
+          {/* 펫 존 — 모바일 숨김, lg 이상에서만 표시 */}
+          <div className="hidden lg:block flex-1 min-h-0 relative">
             <PetZone
               pets={dmMaster.pets}
               dms={dms}
