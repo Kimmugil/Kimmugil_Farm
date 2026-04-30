@@ -88,10 +88,10 @@ export default function PageLayout({ cards, texts, scrollSpeed, initialDms, dmMa
       <main className="min-h-screen flex flex-col overflow-hidden">
 
         {/* ── 히어로 영역 ── */}
-        <section className="flex-1 min-h-0 flex flex-col overflow-hidden">
+        <section className="flex-1 min-h-0 relative overflow-hidden">
 
           {/* 타이틀 + DM 버튼 */}
-          <div className="flex-shrink-0 pl-[10%] pr-8 pt-12 pb-4 flex items-start justify-between">
+          <div className="pl-[10%] pr-8 pt-12 pb-4 flex items-start justify-between">
             <div>
               <h1 className="text-6xl md:text-8xl lg:text-[9rem] font-black tracking-tighter text-white leading-none">
                 {texts["HEADER_TITLE"] || "Portfolio"}
@@ -127,8 +127,8 @@ export default function PageLayout({ cards, texts, scrollSpeed, initialDms, dmMa
             </button>
           </div>
 
-          {/* 펫 존 — 전체 너비 */}
-          <div className="flex-1 min-h-0 relative">
+          {/* 펫 존 — 히어로 하단에 절대 고정 */}
+          <div className="absolute inset-x-0 bottom-0" style={{ height: 160 }}>
             <PetZone
               pets={dmMaster.pets}
               dms={dms}

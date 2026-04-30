@@ -140,8 +140,10 @@ export default function PetZone({
           petWidthsRef.current.set(pet.id, emojiEl.offsetWidth);
         }
         const petW = petWidthsRef.current.get(pet.id) ?? petHeightPx(pet.size) * 4;
-        const maxX = Math.max(0, W - petW - 4);
-        if (s.x < 0)    { s.x = 0;    s.vx = Math.abs(s.vx); }
+        const edgeMargin = Math.round(W * 0.05); // 좌우 5% 페이드 안쪽으로 경계 제한
+        const minX = edgeMargin;
+        const maxX = Math.max(minX, W - petW - edgeMargin);
+        if (s.x < minX) { s.x = minX; s.vx = Math.abs(s.vx); }
         if (s.x > maxX) { s.x = maxX; s.vx = -Math.abs(s.vx); }
         if (Math.abs(s.vx) > 0.5) s.facingRight = s.vx > 0;
 
@@ -150,7 +152,7 @@ export default function PetZone({
           const dx = s.x - o.x;
           const dist = Math.abs(dx);
           if (dist < repulsionRadius && dist > 0.5) {
-            const f = ((repulsionRadius - dist) / repulsionRadius) * 18;
+            const f = ((repulsionRadius - dist) / repulsionRadius) * 45; // 반발력 강화 (18 → 45)
             const dir = dx > 0 ? 1 : -1;
             s.vx += dir * f * dt;
             o.vx -= dir * f * dt;
