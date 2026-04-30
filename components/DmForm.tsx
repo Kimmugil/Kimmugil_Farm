@@ -51,17 +51,20 @@ export default function DmForm({ texts, onDmSent }: Props) {
     }
   }
 
+  const inputCls = "w-full bg-transparent border-b py-1.5 text-sm text-[#e8e8e8] placeholder-[#777777] focus:outline-none transition-colors";
+  const borderStyle = { borderColor: "#3a3a3a" };
+
   return (
     <form
       onSubmit={handleSend}
       className="w-64 rounded-2xl p-4"
-      style={{ background: "rgba(255,255,255,0.04)", border: "1px solid rgba(255,255,255,0.1)" }}
+      style={{ background: "#1c1c1c", border: "1px solid #333333" }}
     >
       {/* 닉네임 */}
       <div className="mb-3">
-        <label className="block text-[11px] text-[#888888] uppercase tracking-widest mb-1.5">
+        <label className="block text-xs text-[#aaaaaa] uppercase tracking-widest mb-1.5">
           {t("DM_LABEL_NICK", "닉네임")}
-          <span className="ml-1 normal-case tracking-normal text-[#555555]">
+          <span className="ml-1 normal-case tracking-normal text-[#666666]">
             {t("DM_OPTIONAL", "(선택)")}
           </span>
         </label>
@@ -70,13 +73,13 @@ export default function DmForm({ texts, onDmSent }: Props) {
           value={nickname}
           onChange={(e) => setNickname(e.target.value.slice(0, 20))}
           placeholder={t("DM_PLACEHOLDER_NICK", "비워두면 랜덤 생성")}
-          className="w-full bg-transparent border-b py-1.5 text-sm text-white focus:outline-none transition-colors"
-          style={{ borderColor: "rgba(255,255,255,0.15)" }}
-          onFocus={(e) => (e.target.style.borderColor = "rgba(255,255,255,0.35)")}
-          onBlur={(e) => (e.target.style.borderColor = "rgba(255,255,255,0.15)")}
+          className={inputCls}
+          style={borderStyle}
+          onFocus={(e) => (e.target.style.borderColor = "#666666")}
+          onBlur={(e) => (e.target.style.borderColor = "#3a3a3a")}
         />
         {!nickname && (
-          <p className="text-[10px] mt-0.5" style={{ color: "#666666" }}>
+          <p className="text-[10px] text-[#777777] mt-0.5">
             {t("DM_ANON_HINT", "비워두면 랜덤 닉네임이 생성됩니다")}
           </p>
         )}
@@ -84,7 +87,7 @@ export default function DmForm({ texts, onDmSent }: Props) {
 
       {/* 메시지 */}
       <div className="mb-3">
-        <label className="block text-[11px] text-[#888888] uppercase tracking-widest mb-1.5">
+        <label className="block text-xs text-[#aaaaaa] uppercase tracking-widest mb-1.5">
           {t("DM_LABEL_MSG", "메시지")}
         </label>
         <textarea
@@ -92,10 +95,10 @@ export default function DmForm({ texts, onDmSent }: Props) {
           onChange={(e) => setContent(e.target.value.slice(0, 200))}
           placeholder={t("DM_PLACEHOLDER_MSG", "남기고 싶은 말을 써주세요")}
           rows={3}
-          className="w-full bg-transparent border-b py-1.5 text-sm text-white focus:outline-none transition-colors resize-none"
-          style={{ borderColor: "rgba(255,255,255,0.15)" }}
-          onFocus={(e) => (e.target.style.borderColor = "rgba(255,255,255,0.35)")}
-          onBlur={(e) => (e.target.style.borderColor = "rgba(255,255,255,0.15)")}
+          className={inputCls + " resize-none"}
+          style={borderStyle}
+          onFocus={(e) => (e.target.style.borderColor = "#666666")}
+          onBlur={(e) => (e.target.style.borderColor = "#3a3a3a")}
         />
       </div>
 
@@ -105,14 +108,12 @@ export default function DmForm({ texts, onDmSent }: Props) {
           {statusMsg || "·"}
         </p>
         <div className="flex items-center gap-2 shrink-0">
-          <span className="text-[11px] text-[#555555]">{content.length}/200</span>
+          <span className="text-[11px] text-[#777777]">{content.length}/200</span>
           <button
             type="submit"
             disabled={sending || !content.trim()}
-            className="flex items-center gap-1.5 text-[11px] px-2.5 py-1.5 rounded-lg transition-all disabled:opacity-30 disabled:cursor-not-allowed"
-            style={{ background: "rgba(255,255,255,0.07)", border: "1px solid rgba(255,255,255,0.15)", color: "#aaaaaa" }}
-            onMouseEnter={(e) => { if (!sending && content.trim()) { (e.currentTarget as HTMLButtonElement).style.color = "white"; (e.currentTarget as HTMLButtonElement).style.borderColor = "rgba(255,255,255,0.4)"; } }}
-            onMouseLeave={(e) => { (e.currentTarget as HTMLButtonElement).style.color = "#aaaaaa"; (e.currentTarget as HTMLButtonElement).style.borderColor = "rgba(255,255,255,0.15)"; }}
+            className="flex items-center gap-1.5 text-[11px] px-2.5 py-1.5 rounded-lg text-[#cccccc] hover:text-white transition-all disabled:opacity-30 disabled:cursor-not-allowed"
+            style={{ background: "#2a2a2a", border: "1px solid #444444" }}
           >
             {sending ? (
               <svg className="animate-spin" width="10" height="10" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2.5">

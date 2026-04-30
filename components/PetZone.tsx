@@ -35,6 +35,7 @@ export default function PetZone({
   const containerRef = useRef<HTMLDivElement>(null);
   const wrapRefs = useRef<Map<number, HTMLDivElement | null>>(new Map());
   const emojiRefs = useRef<Map<number, HTMLSpanElement | null>>(new Map());
+  const petWidthsRef = useRef<Map<number, number>>(new Map()); // 실제 렌더링 너비 캐시
   const runtimeRef = useRef<PetRuntime[]>([]);
   const rafRef = useRef<number>(0);
   const lastTimeRef = useRef<number>(0);
@@ -49,6 +50,7 @@ export default function PetZone({
   const petHeightPx = (size: number) => size * petSizeScale * 16 * 1.1;
 
   useEffect(() => {
+    petWidthsRef.current.clear(); // 펫 구성 바뀌면 너비 캐시 리셋
     const W = containerRef.current?.clientWidth ?? 800;
     const H = containerRef.current?.clientHeight ?? 200;
 
@@ -132,8 +134,13 @@ export default function PetZone({
           s.y = groundY;
         }
 
-        const petW = petHeightPx(pet.size) * 1.5;
-        const maxX = W - petW;
+        // 실제 이모지 너비를 첫 프레임에 측정 후 캐싱 (카오모지는 높이보다 훨씬 넓음)
+        const emojiEl = emojiRefs.current.get(pet.id);
+        if (emojiEl && !petWidthsRef.current.has(pet.id)) {
+          petWidthsRef.current.set(pet.id, emojiEl.offsetWidth);
+        }
+        const petW = petWidthsRef.current.get(pet.id) ?? petHeightPx(pet.size) * 4;
+        const maxX = Math.max(0, W - petW - 4);
         if (s.x < 0)    { s.x = 0;    s.vx = Math.abs(s.vx); }
         if (s.x > maxX) { s.x = maxX; s.vx = -Math.abs(s.vx); }
         if (Math.abs(s.vx) > 0.5) s.facingRight = s.vx > 0;
