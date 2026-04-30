@@ -32,7 +32,6 @@ export interface DmMessage {
   nickname: string;
   content: string;
   timestamp: string;
-  petEmoji?: string; // DM 시트 E열: 표시할 펫 이모지 (예: (●'◡'●))
 }
 
 export interface UITexts {

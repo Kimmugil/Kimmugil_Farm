@@ -151,15 +151,11 @@ export async function fetchDMs(maxCount = 30): Promise<DmMessage[]> {
   if (rows.length < 2) return [];
 
   const dataRows = rows.slice(1).slice(-maxCount);
-  return dataRows.map((row) => {
-    const petEmoji = (row[4] ?? "").trim();
-    return {
-      nickname:  row[2] ?? "알 수 없음",
-      content:   row[3] ?? "",
-      timestamp: row[1] ?? "",
-      ...(petEmoji ? { petEmoji } : {}),
-    };
-  }).filter((m) => m.content.trim());
+  return dataRows.map((row) => ({
+    nickname:  row[2] ?? "알 수 없음",
+    content:   row[3] ?? "",
+    timestamp: row[1] ?? "",
+  })).filter((m) => m.content.trim());
 }
 
 export async function fetchDmMaster(): Promise<DmMasterConfig> {

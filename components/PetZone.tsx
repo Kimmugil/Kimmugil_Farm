@@ -42,19 +42,16 @@ export default function PetZone({
 
   const activePets = pets.filter((p) => p.active);
 
-  // petEmoji가 지정된 DM → 해당 이모지 펫에 가장 최근 메시지 배정
-  // petEmoji 없는 DM → 배정 안 된 펫들에게 순서대로 자동 분배
-  const taggedDms   = dms.filter((d) => d.petEmoji);
-  const untaggedDms = dms.filter((d) => !d.petEmoji);
-  const untaggedPets = activePets.filter((p) => !taggedDms.some((d) => d.petEmoji === p.emoji));
-
+  // fixedMessage 있으면 항상 그 메시지 표시
+  // 없는 펫에는 최근 방문자 DM 자동 분배
+  const freePets = activePets.filter((p) => !p.fixedMessage);
   const assignedDms = activePets.map((pet, i) => {
-    const pinned = taggedDms.filter((d) => d.petEmoji === pet.emoji);
-    if (pinned.length > 0) return pinned[pinned.length - 1];
-
-    const untaggedIdx = untaggedPets.indexOf(pet);
-    const idx = untaggedDms.length - untaggedPets.length + untaggedIdx;
-    return idx >= 0 ? untaggedDms[idx] : undefined;
+    if (pet.fixedMessage) {
+      return { nickname: "", content: pet.fixedMessage, timestamp: "" } as DmMessage;
+    }
+    const freeIdx = freePets.indexOf(pet);
+    const idx = dms.length - freePets.length + freeIdx;
+    return idx >= 0 ? dms[idx] : undefined;
   });
 
   // px 높이 = font-size(rem) * 16 * 보정계수(이모지 실제 높이)
