@@ -1,5 +1,5 @@
 import { google } from "googleapis";
-import type { SiteConfig, UITexts, Card, DmMessage } from "./types";
+import type { SiteConfig, UITexts, Card, DmMessage, DmMasterConfig } from "./types";
 
 function getAuthClient() {
   const email = process.env.GOOGLE_SERVICE_ACCOUNT_EMAIL;
@@ -138,7 +138,7 @@ export async function updateSheetRange(
   });
 }
 
-export async function fetchDMs(): Promise<DmMessage[]> {
+export async function fetchDMs(maxCount = 30): Promise<DmMessage[]> {
   const sheets = await getSheetsClient();
   const spreadsheetId = getSheetId();
 
@@ -150,13 +150,59 @@ export async function fetchDMs(): Promise<DmMessage[]> {
   const rows = res.data.values ?? [];
   if (rows.length < 2) return [];
 
-  // 헤더 스킵, UUID 제외(A열), 최신 30개
-  const dataRows = rows.slice(1).slice(-30);
+  const dataRows = rows.slice(1).slice(-maxCount);
   return dataRows.map((row) => ({
     nickname: row[2] ?? "알 수 없음",
     content:  row[3] ?? "",
     timestamp: row[1] ?? "",
   })).filter((m) => m.content.trim());
+}
+
+export async function fetchDmMaster(): Promise<DmMasterConfig> {
+  try {
+    const sheets = await getSheetsClient();
+    const spreadsheetId = getSheetId();
+
+    const res = await sheets.spreadsheets.values.get({
+      spreadsheetId,
+      range: "DM_MASTER!A:E",
+    });
+
+    const rows = res.data.values ?? [];
+    const settings: Record<string, string> = {};
+    const SETTING_KEYS = new Set(["MAX_DMS", "GROUND_HEIGHT", "REPULSION_RADIUS"]);
+    let petHeaderFound = false;
+    const pets: DmMasterConfig["pets"] = [];
+
+    for (const row of rows) {
+      const key = (row[0] ?? "").trim();
+      if (!petHeaderFound) {
+        if (SETTING_KEYS.has(key)) {
+          settings[key] = (row[1] ?? "").trim();
+        } else if (key === "EMOJI") {
+          petHeaderFound = true;
+        }
+      } else {
+        if (!key) continue;
+        pets.push({
+          id: pets.length + 1,
+          emoji: key,
+          size: parseFloat(row[1] ?? "1") || 1,
+          speed: parseFloat(row[2] ?? "50") || 50,
+          active: (row[3] ?? "true").toLowerCase() !== "false",
+        });
+      }
+    }
+
+    return {
+      maxDms: parseInt(settings["MAX_DMS"] ?? "10") || 10,
+      groundHeight: parseInt(settings["GROUND_HEIGHT"] ?? "200") || 200,
+      repulsionRadius: parseInt(settings["REPULSION_RADIUS"] ?? "70") || 70,
+      pets,
+    };
+  } catch {
+    return { maxDms: 10, groundHeight: 200, repulsionRadius: 70, pets: [] };
+  }
 }
 
 export async function appendDM(

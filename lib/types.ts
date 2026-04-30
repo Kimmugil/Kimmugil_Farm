@@ -9,6 +9,21 @@ export interface SiteConfig {
   DM_RIGHT_PADDING: string;
 }
 
+export interface DmPet {
+  id: number;
+  emoji: string;
+  size: number;    // 1.0 = base (~22px)
+  speed: number;  // px/s
+  active: boolean;
+}
+
+export interface DmMasterConfig {
+  maxDms: number;
+  groundHeight: number;
+  repulsionRadius: number;
+  pets: DmPet[];
+}
+
 export interface DmMessage {
   nickname: string;
   content: string;

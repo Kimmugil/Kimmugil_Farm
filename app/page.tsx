@@ -1,16 +1,17 @@
-import { fetchConfig, fetchUITexts, fetchCards, fetchDMs } from "@/lib/sheets";
+import { fetchConfig, fetchUITexts, fetchCards, fetchDMs, fetchDmMaster } from "@/lib/sheets";
 import PortfolioClient from "@/components/PortfolioClient";
 
 export const dynamic = "force-dynamic";
 
 export default async function Home() {
   try {
-    const [config, texts, cards, dms] = await Promise.all([
+    const [config, texts, cards, dmMaster] = await Promise.all([
       fetchConfig(),
       fetchUITexts(),
       fetchCards(),
-      fetchDMs(),
+      fetchDmMaster(),
     ]);
+    const dms = await fetchDMs(dmMaster.maxDms);
 
     return (
       <PortfolioClient
@@ -19,8 +20,7 @@ export default async function Home() {
         initialCards={cards}
         scrollSpeed={config.SCROLL_SPEED}
         initialDms={dms}
-        dmLeftOffset={config.DM_LEFT_OFFSET}
-        dmRightPadding={config.DM_RIGHT_PADDING}
+        dmMaster={dmMaster}
       />
     );
   } catch (err) {

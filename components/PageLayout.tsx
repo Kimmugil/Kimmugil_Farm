@@ -1,17 +1,17 @@
 "use client";
 
 import { useState } from "react";
-import type { Card, UITexts, DmMessage } from "@/lib/types";
+import type { Card, UITexts, DmMessage, DmMasterConfig } from "@/lib/types";
 import ProjectCard from "./ProjectCard";
-import DmPanel from "./DmPanel";
+import DmForm from "./DmForm";
+import PetZone from "./PetZone";
 
 interface Props {
   cards: Card[];
   texts: UITexts;
   scrollSpeed: number;
   initialDms: DmMessage[];
-  dmLeftOffset: string;
-  dmRightPadding: string;
+  dmMaster: DmMasterConfig;
 }
 
 function MarqueeIcon({ active }: { active: boolean }) {
@@ -37,15 +37,17 @@ function GridIcon({ active }: { active: boolean }) {
   );
 }
 
-export default function PageLayout({ cards, texts, scrollSpeed, initialDms, dmLeftOffset, dmRightPadding }: Props) {
+export default function PageLayout({ cards, texts, scrollSpeed, initialDms, dmMaster }: Props) {
   const [view, setView] = useState<"marquee" | "grid">("marquee");
   const [hoveredIdx, setHoveredIdx] = useState<number | null>(null);
+  const [dms, setDms] = useState<DmMessage[]>(initialDms);
 
-  const detailsLabel = texts["CARD_DETAILS_LABEL"]   ?? "DETAILS";
-  const soonLabel    = texts["CARD_SOON_LABEL"]       ?? "준비중...";
-  const soonNoUrlMsg = texts["CARD_SOON_NO_URL_MSG"]  ?? "아직 준비 중인 프로젝트입니다.";
+  const handleDmSent = (msg: DmMessage) => setDms((prev) => [...prev, msg]);
 
-  // 화면을 채울 만큼 복제 후 2배 (무한 루프)
+  const detailsLabel = texts["CARD_DETAILS_LABEL"]  ?? "DETAILS";
+  const soonLabel    = texts["CARD_SOON_LABEL"]      ?? "준비중...";
+  const soonNoUrlMsg = texts["CARD_SOON_NO_URL_MSG"] ?? "아직 준비 중인 프로젝트입니다.";
+
   const repeated = cards.length > 0
     ? Array.from({ length: Math.max(2, Math.ceil(14 / cards.length)) }, () => cards).flat()
     : [];
@@ -61,47 +63,50 @@ export default function PageLayout({ cards, texts, scrollSpeed, initialDms, dmLe
   }
 
   return (
-    <main className="min-h-screen flex flex-col overflow-hidden">
+    <main className="flex flex-col">
 
-      {/* 타이틀 + DM 패널 */}
-      <div className="flex-1 overflow-hidden min-h-0 relative">
+      {/* ── 히어로 영역 (항상 100vh 고정) ── */}
+      <section className="h-screen flex flex-col overflow-hidden">
 
-      {/* 타이틀 */}
-      <div className="flex flex-col justify-center pl-[10%] pr-8 pt-12 pb-4 h-full">
-        <h1 className="text-6xl md:text-8xl lg:text-[9rem] font-black tracking-tighter text-white leading-none">
-          {texts["HEADER_TITLE"] || "Portfolio"}
-        </h1>
-        {texts["HEADER_SUBTITLE"] && (
-          <p className="mt-4 text-sm text-[#555555] font-medium tracking-wide">
-            {texts["HEADER_SUBTITLE"]}
-          </p>
-        )}
-        {(texts["HEADER_DESC_LEFT"] || texts["HEADER_DESC_RIGHT"]) && (
-          <div className="mt-4 flex flex-col sm:flex-row gap-2 max-w-lg">
-            {texts["HEADER_DESC_LEFT"] && (
-              <p className="text-xs text-[#444444] leading-relaxed">{texts["HEADER_DESC_LEFT"]}</p>
-            )}
-            {texts["HEADER_DESC_RIGHT"] && (
-              <p className="text-xs text-[#444444] leading-relaxed">{texts["HEADER_DESC_RIGHT"]}</p>
-            )}
-          </div>
-        )}
-      </div>
+        {/* 타이틀 + DM 입력폼 */}
+        <div className="flex-1 flex flex-col justify-start pl-[10%] pr-8 pt-12 min-h-0">
+          <h1 className="text-6xl md:text-8xl lg:text-[9rem] font-black tracking-tighter text-white leading-none">
+            {texts["HEADER_TITLE"] || "Portfolio"}
+          </h1>
+          {texts["HEADER_SUBTITLE"] && (
+            <p className="mt-4 text-sm text-[#555555] font-medium tracking-wide">
+              {texts["HEADER_SUBTITLE"]}
+            </p>
+          )}
+          {(texts["HEADER_DESC_LEFT"] || texts["HEADER_DESC_RIGHT"]) && (
+            <div className="mt-2 flex flex-col sm:flex-row gap-2 max-w-lg">
+              {texts["HEADER_DESC_LEFT"] && (
+                <p className="text-xs text-[#444444] leading-relaxed">{texts["HEADER_DESC_LEFT"]}</p>
+              )}
+              {texts["HEADER_DESC_RIGHT"] && (
+                <p className="text-xs text-[#444444] leading-relaxed">{texts["HEADER_DESC_RIGHT"]}</p>
+              )}
+            </div>
+          )}
 
-      {/* DM — 절대 위치, 타이틀 위에 오버레이 */}
-      <div
-        className="hidden lg:flex absolute inset-y-0"
-        style={{ left: dmLeftOffset, right: dmRightPadding }}
-      >
-        <DmPanel initialDms={initialDms} texts={texts} />
-      </div>
+          {/* DM 입력폼 — 타이틀 바로 아래 왼쪽 */}
+          <DmForm texts={texts} onDmSent={handleDmSent} />
+        </div>
 
-      </div>{/* end flex-1 */}
+        {/* 펫 존 — 히어로 하단, 구분선 바로 위 */}
+        <PetZone
+          pets={dmMaster.pets}
+          dms={dms}
+          groundHeight={dmMaster.groundHeight}
+          repulsionRadius={dmMaster.repulsionRadius}
+        />
 
-      {/* 카드 영역 */}
+      </section>
+
+      {/* ── 카드 영역 (스크롤로 노출) ── */}
       <div className="border-t border-[#1a1a1a] mb-20">
 
-        {/* 뷰 전환 버튼 — 카드 바로 위, 타이틀과 같은 좌측 패딩 */}
+        {/* 뷰 전환 버튼 */}
         <div className="flex justify-start pl-[10%] pt-4 pb-0 gap-2">
           <button
             onClick={() => setView("marquee")}
@@ -122,6 +127,7 @@ export default function PageLayout({ cards, texts, scrollSpeed, initialDms, dmLe
             <GridIcon active={view === "grid"} />
           </button>
         </div>
+
         {cards.length === 0 ? (
           <p className="text-center text-[#555555] py-16 text-sm px-8">
             {texts["EMPTY_MESSAGE"] || "등록된 프로젝트가 없습니다."}
