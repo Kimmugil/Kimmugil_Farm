@@ -12,20 +12,20 @@ interface Props {
 
 interface PetRuntime {
   x: number;
-  y: number;
+  y: number;       // 항상 groundY에 고정, 점프 시에만 변화
+  groundY: number; // 이 펫의 "바닥" y좌표
   vx: number;
-  vy: number;
+  vy: number;      // 점프 시에만 사용
   facingRight: boolean;
   animType: "walk" | "shake" | "jump";
-  animTimer: number;  // ms remaining until next state change
+  animTimer: number;
   speed: number;
-  jumpPhase: number;  // 0→1 progress through jump arc
-  baseY: number;      // y snapshot when jump started
-  shakePhase: number; // oscillation angle for shake
+  shakePhase: number;
+  isAirborne: boolean;
 }
 
-// 1 size unit ≈ this many px (rough emoji footprint)
 const BASE_PX = 22;
+const GRAVITY = 900; // px/s² — 점프 후 빠르게 바닥으로
 
 export default function PetZone({ pets, dms, groundHeight, repulsionRadius }: Props) {
   const containerRef = useRef<HTMLDivElement>(null);
@@ -37,54 +37,52 @@ export default function PetZone({ pets, dms, groundHeight, repulsionRadius }: Pr
 
   const activePets = pets.filter((p) => p.active);
 
-  // Latest N dms → one per active pet slot
   const assignedDms = activePets.map((_, i) => {
     const idx = dms.length - activePets.length + i;
     return idx >= 0 ? dms[idx] : undefined;
   });
 
-  // (Re-)init runtimes when active pet set changes
+  // 초기 위치 설정 — 모두 바닥에 고르게 배치
   useEffect(() => {
     const W = containerRef.current?.clientWidth ?? 800;
-    const H = groundHeight;
+
     runtimeRef.current = activePets.map((pet, i) => {
+      const petPx = pet.size * BASE_PX;
+      const gY = groundHeight - petPx;
       const spread = activePets.length > 1 ? W / activePets.length : W * 0.5;
       return {
         x: spread * i + spread * 0.3 + Math.random() * spread * 0.4,
-        y: H * (0.25 + Math.random() * 0.5),
-        vx: (Math.random() - 0.5) * pet.speed * 1.4,
-        vy: (Math.random() - 0.5) * pet.speed * 0.4,
+        y: gY,
+        groundY: gY,
+        vx: (Math.random() > 0.5 ? 1 : -1) * pet.speed * (0.6 + Math.random() * 0.5),
+        vy: 0,
         facingRight: Math.random() > 0.5,
         animType: "walk" as const,
-        animTimer: Math.random() * 2000 + 500,
+        animTimer: Math.random() * 1500 + 500,
         speed: pet.speed,
-        jumpPhase: 0,
-        baseY: H * 0.5,
         shakePhase: 0,
+        isAirborne: false,
       };
     });
     // eslint-disable-next-line react-hooks/exhaustive-deps
   }, [activePets.length, groundHeight]);
 
-  // rAF animation loop — direct DOM manipulation, zero React re-renders
+  // rAF 루프 — 바닥 고정 이동 + 점프 물리
   useEffect(() => {
     if (activePets.length === 0) return;
     lastTimeRef.current = 0;
 
     function tick(time: number) {
-      // Skip first frame to init lastTime cleanly
       if (lastTimeRef.current === 0) {
         lastTimeRef.current = time;
         rafRef.current = requestAnimationFrame(tick);
         return;
       }
-
       const rawMs = time - lastTimeRef.current;
       lastTimeRef.current = time;
-      const dt = Math.min(rawMs / 1000, 0.05); // cap at 50ms (handles tab sleep)
+      const dt = Math.min(rawMs / 1000, 0.05);
 
       const W = containerRef.current?.clientWidth ?? 800;
-      const H = groundHeight;
       const states = runtimeRef.current;
 
       for (let i = 0; i < states.length; i++) {
@@ -92,88 +90,79 @@ export default function PetZone({ pets, dms, groundHeight, repulsionRadius }: Pr
         const pet = activePets[i];
         const petPx = pet.size * BASE_PX;
 
-        // ── Anim state timer ──────────────────────────────
+        // ── 상태 타이머 ──────────────────────────────────
         s.animTimer -= rawMs;
-        if (s.animTimer <= 0) {
+        if (s.animTimer <= 0 && !s.isAirborne) {
           const r = Math.random();
-          if (r < 0.07) {
+          if (r < 0.06) {
+            // 부들부들
             s.animType = "shake";
             s.shakePhase = 0;
-            s.animTimer = 350 + Math.random() * 500;
-          } else if (r < 0.13) {
+            s.animTimer = 300 + Math.random() * 500;
+          } else if (r < 0.10) {
+            // 점프 (드물게)
             s.animType = "jump";
-            s.jumpPhase = 0;
-            s.baseY = s.y;
-            s.animTimer = 700;
+            s.vy = -(s.speed * 2.8 + 100);
+            s.isAirborne = true;
+            s.animTimer = 3000; // 안전 타이머
           } else {
+            // 방향 전환 (수평만)
             s.animType = "walk";
-            s.animTimer = 1200 + Math.random() * 2800;
-            // Occasionally change direction
-            if (Math.random() < 0.55) {
-              const angle = Math.random() * Math.PI * 2;
-              s.vx = Math.cos(angle) * s.speed * (0.6 + Math.random() * 0.8);
-              s.vy = Math.sin(angle) * s.speed * 0.4;
+            s.animTimer = 1500 + Math.random() * 3000;
+            if (Math.random() < 0.5) {
+              const dir = Math.random() > 0.5 ? 1 : -1;
+              s.vx = dir * s.speed * (0.5 + Math.random() * 0.8);
             }
           }
         }
 
-        // ── Movement ──────────────────────────────────────
-        if (s.animType === "jump") {
-          s.jumpPhase += dt * (1000 / 700);
-          if (s.jumpPhase >= 1) {
-            s.jumpPhase = 1;
-            s.animType = "walk";
-            s.animTimer = 600 + Math.random() * 1000;
-            s.y = s.baseY;
-          } else {
-            s.y = s.baseY - Math.sin(s.jumpPhase * Math.PI) * petPx * 1.8;
-          }
-          s.x += s.vx * dt * 0.35;
-        } else {
-          s.x += s.vx * dt;
+        // ── 이동 ─────────────────────────────────────────
+        if (s.isAirborne) {
+          // 점프 물리: 중력 적용
+          s.vy += GRAVITY * dt;
+          s.x += s.vx * dt * 0.4;
           s.y += s.vy * dt;
+
+          if (s.y >= s.groundY) {
+            // 착지
+            s.y = s.groundY;
+            s.vy = 0;
+            s.isAirborne = false;
+            s.animType = "walk";
+            s.animTimer = 800 + Math.random() * 1500;
+          }
+        } else {
+          // 평소: 수평만 이동, y는 바닥에 고정
+          s.x += s.vx * dt;
+          s.y = s.groundY;
         }
 
-        // ── Boundary bounce ───────────────────────────────
+        // ── 좌우 경계 반사 ────────────────────────────────
         const maxX = W - petPx * 2;
-        const maxY = H - petPx;
-        if (s.x < 0)     { s.x = 0;    s.vx = Math.abs(s.vx); }
-        if (s.x > maxX)  { s.x = maxX; s.vx = -Math.abs(s.vx); }
-        if (s.y < 0)     { s.y = 0;    s.vy = Math.abs(s.vy); }
-        if (s.y > maxY)  {
-          s.y = maxY;
-          s.vy = -Math.abs(s.vy) * 0.6;
-          if (s.animType === "jump") { s.animType = "walk"; s.animTimer = 800; }
-        }
+        if (s.x < 0)    { s.x = 0;    s.vx = Math.abs(s.vx); }
+        if (s.x > maxX) { s.x = maxX; s.vx = -Math.abs(s.vx); }
 
-        // ── Facing direction ──────────────────────────────
-        if (Math.abs(s.vx) > 1) s.facingRight = s.vx > 0;
+        // ── 바라보는 방향 ─────────────────────────────────
+        if (Math.abs(s.vx) > 0.5) s.facingRight = s.vx > 0;
 
-        // ── Soft repulsion between pets ───────────────────
+        // ── 수평 충돌 반발 ────────────────────────────────
         for (let j = i + 1; j < states.length; j++) {
           const o = states[j];
           const dx = s.x - o.x;
-          const dy = s.y - o.y;
-          const dist = Math.sqrt(dx * dx + dy * dy);
+          const dist = Math.abs(dx);
           if (dist < repulsionRadius && dist > 0.5) {
-            const f = ((repulsionRadius - dist) / repulsionRadius) * 22;
-            const nx = dx / dist;
-            const ny = dy / dist;
-            s.vx += nx * f * dt;
-            s.vy += ny * f * dt;
-            o.vx -= nx * f * dt;
-            o.vy -= ny * f * dt;
-            const clamp = (vx: number, vy: number, max: number) => {
-              const spd = Math.sqrt(vx * vx + vy * vy);
-              if (spd > max * 1.5) return [vx * max * 1.5 / spd, vy * max * 1.5 / spd] as const;
-              return [vx, vy] as const;
-            };
-            [s.vx, s.vy] = clamp(s.vx, s.vy, s.speed);
-            [o.vx, o.vy] = clamp(o.vx, o.vy, o.speed);
+            const f = ((repulsionRadius - dist) / repulsionRadius) * 18;
+            const dir = dx > 0 ? 1 : -1;
+            s.vx += dir * f * dt;
+            o.vx -= dir * f * dt;
+            const clampV = (v: number, max: number) =>
+              Math.abs(v) > max * 1.5 ? (v > 0 ? 1 : -1) * max * 1.5 : v;
+            s.vx = clampV(s.vx, s.speed);
+            o.vx = clampV(o.vx, o.speed);
           }
         }
 
-        // ── DOM update (bypass React) ─────────────────────
+        // ── DOM 직접 업데이트 ─────────────────────────────
         const wrap = wrapRefs.current.get(pet.id);
         const emoji = emojiRefs.current.get(pet.id);
 
@@ -182,8 +171,8 @@ export default function PetZone({ pets, dms, groundHeight, repulsionRadius }: Pr
         }
         if (emoji) {
           const flipX = s.facingRight ? 1 : -1;
-          if (s.animType === "shake") {
-            s.shakePhase += dt * 30;
+          if (s.animType === "shake" && !s.isAirborne) {
+            s.shakePhase += dt * 28;
             const shakeX = Math.sin(s.shakePhase) * 2.5;
             emoji.style.transform = `scaleX(${flipX}) translateX(${shakeX}px)`;
           } else {
@@ -219,7 +208,7 @@ export default function PetZone({ pets, dms, groundHeight, repulsionRadius }: Pr
             className="absolute top-0 left-0 pointer-events-none select-none"
             style={{ willChange: "transform" }}
           >
-            {/* Speech bubble */}
+            {/* 말풍선 — 캐릭터 머리 위 */}
             {dm && (
               <div
                 className="absolute"
@@ -238,9 +227,7 @@ export default function PetZone({ pets, dms, groundHeight, repulsionRadius }: Pr
                   WebkitBackdropFilter: "blur(4px)",
                 }}
               >
-                <p
-                  className="text-[9px] text-[#666666] mb-0.5 max-w-[132px] truncate"
-                >
+                <p className="text-[9px] text-[#666666] mb-0.5 max-w-[132px] truncate">
                   {dm.nickname}
                 </p>
                 <p
@@ -249,7 +236,7 @@ export default function PetZone({ pets, dms, groundHeight, repulsionRadius }: Pr
                 >
                   {dm.content.length > 60 ? dm.content.slice(0, 60) + "…" : dm.content}
                 </p>
-                {/* Bubble tail */}
+                {/* 꼬리 */}
                 <div
                   style={{
                     position: "absolute",
@@ -266,7 +253,7 @@ export default function PetZone({ pets, dms, groundHeight, repulsionRadius }: Pr
               </div>
             )}
 
-            {/* Emoji character */}
+            {/* 이모지 캐릭터 */}
             <span
               ref={(el) => { emojiRefs.current.set(pet.id, el); }}
               style={{

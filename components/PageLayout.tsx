@@ -37,6 +37,9 @@ function GridIcon({ active }: { active: boolean }) {
   );
 }
 
+// 마퀴 뷰와 그리드 뷰가 동일한 높이를 유지하도록 고정 (뷰 전환 시 히어로 크기 변화 방지)
+const CARD_AREA_H = 336; // py-7(56) + 카드 min-h(280)
+
 export default function PageLayout({ cards, texts, scrollSpeed, initialDms, dmMaster }: Props) {
   const [view, setView] = useState<"marquee" | "grid">("marquee");
   const [hoveredIdx, setHoveredIdx] = useState<number | null>(null);
@@ -63,13 +66,13 @@ export default function PageLayout({ cards, texts, scrollSpeed, initialDms, dmMa
   }
 
   return (
-    <main className="flex flex-col">
+    <main className="min-h-screen flex flex-col overflow-hidden">
 
-      {/* ── 히어로 영역 (항상 100vh 고정) ── */}
-      <section className="h-screen flex flex-col overflow-hidden">
+      {/* ── 히어로 영역 (flex-1 — 카드 영역 제외한 나머지를 채움) ── */}
+      <section className="flex-1 min-h-0 flex flex-col overflow-hidden">
 
-        {/* 타이틀 + DM 입력폼 */}
-        <div className="flex-1 flex flex-col justify-start pl-[10%] pr-8 pt-12 min-h-0">
+        {/* 타이틀 + DM 폼 */}
+        <div className="flex-1 min-h-0 flex flex-col justify-start pl-[10%] pr-8 pt-12 overflow-hidden">
           <h1 className="text-6xl md:text-8xl lg:text-[9rem] font-black tracking-tighter text-white leading-none">
             {texts["HEADER_TITLE"] || "Portfolio"}
           </h1>
@@ -89,11 +92,11 @@ export default function PageLayout({ cards, texts, scrollSpeed, initialDms, dmMa
             </div>
           )}
 
-          {/* DM 입력폼 — 타이틀 바로 아래 왼쪽 */}
+          {/* DM 폼 — 타이틀 바로 아래 왼쪽 */}
           <DmForm texts={texts} onDmSent={handleDmSent} />
         </div>
 
-        {/* 펫 존 — 히어로 하단, 구분선 바로 위 */}
+        {/* 펫 존 — 히어로 하단, 구분선 바로 위 "땅" */}
         <PetZone
           pets={dmMaster.pets}
           dms={dms}
@@ -103,8 +106,8 @@ export default function PageLayout({ cards, texts, scrollSpeed, initialDms, dmMa
 
       </section>
 
-      {/* ── 카드 영역 (스크롤로 노출) ── */}
-      <div className="border-t border-[#1a1a1a] mb-20">
+      {/* ── 카드 영역 (높이 고정 — 뷰 전환해도 히어로가 움직이지 않음) ── */}
+      <div className="border-t border-[#1a1a1a]">
 
         {/* 뷰 전환 버튼 */}
         <div className="flex justify-start pl-[10%] pt-4 pb-0 gap-2">
@@ -128,73 +131,78 @@ export default function PageLayout({ cards, texts, scrollSpeed, initialDms, dmMa
           </button>
         </div>
 
+        {/* 카드 컨텐츠 — 두 뷰 모두 동일한 높이 박스 안에서 렌더링 */}
         {cards.length === 0 ? (
           <p className="text-center text-[#555555] py-16 text-sm px-8">
             {texts["EMPTY_MESSAGE"] || "등록된 프로젝트가 없습니다."}
           </p>
-        ) : view === "marquee" ? (
-
-          /* ── 슬라이드 뷰 ── */
-          <div
-            className="overflow-hidden py-7"
-            style={{
-              maskImage: "linear-gradient(to right, transparent 0%, black 5%, black 95%, transparent 100%)",
-              WebkitMaskImage: "linear-gradient(to right, transparent 0%, black 5%, black 95%, transparent 100%)",
-            }}
-            onMouseLeave={() => setHoveredIdx(null)}
-          >
-            <div
-              className="flex gap-4"
-              style={{
-                width: "max-content",
-                animation: hoveredIdx !== null
-                  ? `marquee-left ${scrollSpeed}s linear infinite paused`
-                  : `marquee-left ${scrollSpeed}s linear infinite`,
-              }}
-            >
-              {doubled.map((card, i) => (
-                <div
-                  key={i}
-                  className="w-[300px] shrink-0"
-                  style={{
-                    transition: "transform 0.22s cubic-bezier(0.34,1.56,0.64,1), z-index 0s",
-                    ...cardTransformStyle(i),
-                  }}
-                  onMouseEnter={() => setHoveredIdx(i)}
-                  onMouseLeave={() => setHoveredIdx(null)}
-                >
-                  <ProjectCard
-                    card={card}
-                    detailsLabel={detailsLabel}
-                    soonLabel={soonLabel}
-                    soonNoUrlMsg={soonNoUrlMsg}
-                    disableHover
-                  />
-                </div>
-              ))}
-            </div>
-          </div>
-
         ) : (
+          <div style={{ height: CARD_AREA_H }}>
+            {view === "marquee" ? (
 
-          /* ── 그리드 뷰 ── */
-          <div className="pl-[10%] pr-[10%] pt-7 pb-10">
-            <div
-              className="grid gap-4"
-              style={{ gridTemplateColumns: "repeat(auto-fill, minmax(280px, 1fr))" }}
-            >
-              {cards.map((card) => (
-                <ProjectCard
-                  key={card.순서}
-                  card={card}
-                  detailsLabel={detailsLabel}
-                  soonLabel={soonLabel}
-                  soonNoUrlMsg={soonNoUrlMsg}
-                />
-              ))}
-            </div>
+              /* ── 슬라이드 뷰 ── */
+              <div
+                className="h-full overflow-hidden py-7"
+                style={{
+                  maskImage: "linear-gradient(to right, transparent 0%, black 5%, black 95%, transparent 100%)",
+                  WebkitMaskImage: "linear-gradient(to right, transparent 0%, black 5%, black 95%, transparent 100%)",
+                }}
+                onMouseLeave={() => setHoveredIdx(null)}
+              >
+                <div
+                  className="flex gap-4"
+                  style={{
+                    width: "max-content",
+                    animation: hoveredIdx !== null
+                      ? `marquee-left ${scrollSpeed}s linear infinite paused`
+                      : `marquee-left ${scrollSpeed}s linear infinite`,
+                  }}
+                >
+                  {doubled.map((card, i) => (
+                    <div
+                      key={i}
+                      className="w-[300px] shrink-0"
+                      style={{
+                        transition: "transform 0.22s cubic-bezier(0.34,1.56,0.64,1), z-index 0s",
+                        ...cardTransformStyle(i),
+                      }}
+                      onMouseEnter={() => setHoveredIdx(i)}
+                      onMouseLeave={() => setHoveredIdx(null)}
+                    >
+                      <ProjectCard
+                        card={card}
+                        detailsLabel={detailsLabel}
+                        soonLabel={soonLabel}
+                        soonNoUrlMsg={soonNoUrlMsg}
+                        disableHover
+                      />
+                    </div>
+                  ))}
+                </div>
+              </div>
+
+            ) : (
+
+              /* ── 그리드 뷰 — 같은 높이 박스 안에서 스크롤 ── */
+              <div className="h-full overflow-y-auto">
+                <div
+                  className="grid gap-4 pl-[10%] pr-[10%] pt-7 pb-10"
+                  style={{ gridTemplateColumns: "repeat(auto-fill, minmax(280px, 1fr))" }}
+                >
+                  {cards.map((card) => (
+                    <ProjectCard
+                      key={card.순서}
+                      card={card}
+                      detailsLabel={detailsLabel}
+                      soonLabel={soonLabel}
+                      soonNoUrlMsg={soonNoUrlMsg}
+                    />
+                  ))}
+                </div>
+              </div>
+
+            )}
           </div>
-
         )}
       </div>
 

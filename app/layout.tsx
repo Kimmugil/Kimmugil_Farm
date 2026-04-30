@@ -8,9 +8,10 @@ export async function generateMetadata(): Promise<Metadata> {
     return {
       title: config.META_TITLE || "Portfolio",
       description: config.META_DESC || "",
+      icons: { icon: "/icon.png" },
     };
   } catch {
-    return { title: "Portfolio" };
+    return { title: "Portfolio", icons: { icon: "/icon.png" } };
   }
 }
 
