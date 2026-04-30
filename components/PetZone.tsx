@@ -42,18 +42,28 @@ export default function PetZone({
 
   const activePets = pets.filter((p) => p.active);
 
-  // fixedMessage 있으면 항상 그 메시지 표시
-  // 없는 펫에는 최근 방문자 DM 자동 분배 (fixedMessage와 내용 겹치는 DM 제외)
-  const fixedContents = new Set(activePets.map((p) => p.fixedMessage).filter(Boolean));
-  const freePets = activePets.filter((p) => !p.fixedMessage);
-  const autoPool = dms.filter((d) => !fixedContents.has(d.content));
+  // petUuid 지정된 DM → 해당 펫에 가장 최근 것 배정
+  // petUuid 없는 DM → uuid 없거나 배정 못 받은 펫에 자동 분배
   const assignedDms = activePets.map((pet) => {
-    if (pet.fixedMessage) {
-      return { nickname: "", content: pet.fixedMessage, timestamp: "" } as DmMessage;
+    if (pet.uuid) {
+      const pinned = dms.filter((d) => d.petUuid === pet.uuid);
+      if (pinned.length > 0) return pinned[pinned.length - 1];
     }
-    const freeIdx = freePets.indexOf(pet);
-    const idx = autoPool.length - freePets.length + freeIdx;
-    return idx >= 0 ? autoPool[idx] : undefined;
+    return undefined; // 자동 분배는 아래에서 처리
+  });
+
+  // uuid 배정 못 받은 펫들에게 petUuid 없는 DM을 순서대로 분배
+  const assignedDmUuids = new Set(
+    assignedDms.filter(Boolean).map((d) => d!.timestamp + d!.nickname)
+  );
+  const autoPool = dms.filter((d) => !d.petUuid && !assignedDmUuids.has(d.timestamp + d.nickname));
+  const freePetIndices = activePets
+    .map((_, i) => i)
+    .filter((i) => assignedDms[i] === undefined);
+
+  freePetIndices.forEach((petIdx, rank) => {
+    const idx = autoPool.length - freePetIndices.length + rank;
+    assignedDms[petIdx] = idx >= 0 ? autoPool[idx] : undefined;
   });
 
   // px 높이 = font-size(rem) * 16 * 보정계수(이모지 실제 높이)

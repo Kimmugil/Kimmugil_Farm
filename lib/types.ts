@@ -11,11 +11,11 @@ export interface SiteConfig {
 
 export interface DmPet {
   id: number;
+  uuid: string;    // DM_MASTER E열: 펫 고유 식별자
   emoji: string;
   size: number;    // 1.0 = base (~22px)
   speed: number;  // px/s
   active: boolean;
-  fixedMessage?: string; // 항상 표시할 고정 메시지 (없으면 방문자 DM 사용)
 }
 
 export interface DmMasterConfig {
@@ -32,6 +32,7 @@ export interface DmMessage {
   nickname: string;
   content: string;
   timestamp: string;
+  petUuid?: string; // DM 시트 E열: 배정할 펫 UUID (비우면 자동 분배)
 }
 
 export interface UITexts {
