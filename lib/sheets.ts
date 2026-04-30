@@ -152,12 +152,12 @@ export async function fetchDMs(maxCount = 30): Promise<DmMessage[]> {
 
   const dataRows = rows.slice(1).slice(-maxCount);
   return dataRows.map((row) => {
-    const petNo = parseInt(row[4] ?? "");
+    const petEmoji = (row[4] ?? "").trim();
     return {
       nickname:  row[2] ?? "알 수 없음",
       content:   row[3] ?? "",
       timestamp: row[1] ?? "",
-      ...(Number.isFinite(petNo) && petNo > 0 ? { petNo } : {}),
+      ...(petEmoji ? { petEmoji } : {}),
     };
   }).filter((m) => m.content.trim());
 }
