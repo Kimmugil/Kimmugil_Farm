@@ -12,6 +12,13 @@ export default function CardGrid({ cards, texts }: Props) {
   const detailsLabel  = texts["CARD_DETAILS_LABEL"]   ?? "DETAILS";
   const soonLabel     = texts["CARD_SOON_LABEL"]       ?? "준비중...";
   const soonNoUrlMsg  = texts["CARD_SOON_NO_URL_MSG"]  ?? "아직 준비 중인 프로젝트입니다.";
+  const privateTexts  = {
+    hoverMsg:            texts["PRIVATE_HOVER_MSG"]            ?? "관리자만 접근 가능한 툴입니다.",
+    passwordTitle:       texts["PRIVATE_PASSWORD_TITLE"]       ?? "관리자 비밀번호를 입력하세요",
+    passwordPlaceholder: texts["PRIVATE_PASSWORD_PLACEHOLDER"] ?? "비밀번호",
+    passwordError:       texts["PRIVATE_PASSWORD_ERROR"]       ?? "비밀번호가 틀렸습니다.",
+    passwordSubmit:      texts["PRIVATE_PASSWORD_SUBMIT"]      ?? "확인",
+  };
 
   return (
     <main className="max-w-screen-xl mx-auto px-6 md:px-10 pb-16">
@@ -64,6 +71,7 @@ export default function CardGrid({ cards, texts }: Props) {
                 detailsLabel={detailsLabel}
                 soonLabel={soonLabel}
                 soonNoUrlMsg={soonNoUrlMsg}
+                privateTexts={privateTexts}
               />
             ))}
           </div>
