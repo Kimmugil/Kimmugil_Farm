@@ -146,10 +146,12 @@ export default function ProjectCard({ card, detailsLabel, soonLabel, soonNoUrlMs
         </div>
       )}
 
-      {/* PRIVATE 호버 툴팁 */}
+      {/* PRIVATE 호버 오버레이 */}
       {isPrivate && tooltipVisible && (
-        <div className="absolute inset-x-4 bottom-4 z-20 bg-[#1a1a1a] border border-amber-500/30 rounded-xl px-4 py-2.5 text-center text-xs text-amber-400">
-          {privateTexts.hoverMsg}
+        <div className="absolute inset-0 rounded-2xl bg-black/70 backdrop-blur-[2px] flex items-center justify-center z-10 px-4">
+          <p className="text-sm text-amber-400 font-medium text-center leading-relaxed">
+            {privateTexts.hoverMsg}
+          </p>
         </div>
       )}
 
