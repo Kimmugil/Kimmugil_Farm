@@ -13,11 +13,16 @@ export default async function Home() {
     ]);
     const dms = await fetchDMs(dmMaster.maxDms);
 
+    // PRIVATE 카드 URL은 클라이언트에 절대 노출하지 않음
+    const sanitizedCards = cards.map((c) =>
+      c.뱃지 === "PRIVATE" ? { ...c, URL: "" } : c
+    );
+
     return (
       <PortfolioClient
         isOpen={config.OPEN}
         initialTexts={texts}
-        initialCards={cards}
+        initialCards={sanitizedCards}
         scrollSpeed={config.SCROLL_SPEED}
         initialDms={dms}
         dmMaster={dmMaster}
