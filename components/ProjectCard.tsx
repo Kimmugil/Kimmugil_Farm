@@ -1,6 +1,6 @@
 "use client";
 
-import { useState, useRef } from "react";
+import { useState } from "react";
 import Image from "next/image";
 import type { Card } from "@/lib/types";
 
@@ -19,6 +19,7 @@ interface Props {
   soonNoUrlMsg: string;
   disableHover?: boolean;
   privateTexts: PrivateTexts;
+  onPrivateClick?: () => void; // PRIVATE 카드 클릭 시 PageLayout에서 모달 처리
 }
 
 function isImageUrl(value: string): boolean {
@@ -40,7 +41,9 @@ function LockIcon() {
   );
 }
 
-export default function ProjectCard({ card, detailsLabel, soonLabel, soonNoUrlMsg, disableHover, privateTexts }: Props) {
+export { LockIcon };
+
+export default function ProjectCard({ card, detailsLabel, soonLabel, soonNoUrlMsg, disableHover, privateTexts, onPrivateClick }: Props) {
   const descriptions = [card.설명1, card.설명2, card.설명3, card.설명4].filter(Boolean);
   const isSoon    = card.상태 === "SOON";
   const isPrivate = card.뱃지 === "PRIVATE";
@@ -48,50 +51,15 @@ export default function ProjectCard({ card, detailsLabel, soonLabel, soonNoUrlMs
 
   // SOON 토스트
   const [toastVisible, setToastVisible] = useState(false);
-  const toastTimer = useRef<ReturnType<typeof setTimeout> | null>(null);
+  const toastTimer = { current: null as ReturnType<typeof setTimeout> | null };
   function showToast() {
     if (toastTimer.current) clearTimeout(toastTimer.current);
     setToastVisible(true);
     toastTimer.current = setTimeout(() => setToastVisible(false), 2200);
   }
 
-  // PRIVATE 호버 툴팁
-  const [tooltipVisible, setTooltipVisible] = useState(false);
-
-  // PRIVATE 비밀번호 모달
-  const [modalOpen, setModalOpen]   = useState(false);
-  const [password, setPassword]     = useState("");
-  const [pwError, setPwError]       = useState(false);
-  const [submitting, setSubmitting] = useState(false);
-
-  async function handlePrivateSubmit(e: React.FormEvent) {
-    e.preventDefault();
-    if (!password.trim() || submitting) return;
-    setSubmitting(true);
-    setPwError(false);
-    try {
-      const res = await fetch("/api/private-access", {
-        method: "POST",
-        headers: { "Content-Type": "application/json" },
-        body: JSON.stringify({ password, cardNo: card.순서 }),
-      });
-      if (!res.ok) { setPwError(true); return; }
-      const { url } = await res.json();
-      setModalOpen(false);
-      setPassword("");
-      window.open(url, "_blank", "noopener,noreferrer");
-    } catch {
-      setPwError(true);
-    } finally {
-      setSubmitting(false);
-    }
-  }
-
-  function closeModal() {
-    setModalOpen(false);
-    setPassword("");
-    setPwError(false);
-  }
+  // PRIVATE 호버 딤드
+  const [hoverDim, setHoverDim] = useState(false);
 
   const cardBody = (
     <div className="relative flex flex-col h-full min-h-[280px] rounded-2xl border border-[#282828] bg-[#141414] p-5 overflow-hidden">
@@ -106,13 +74,9 @@ export default function ProjectCard({ card, detailsLabel, soonLabel, soonNoUrlMs
 
       {/* 타이틀 / 서브타이틀 */}
       <div className="z-10">
-        <h2 className="text-lg font-bold leading-tight text-white tracking-tight pr-14">
-          {card.타이틀}
-        </h2>
+        <h2 className="text-lg font-bold leading-tight text-white tracking-tight pr-14">{card.타이틀}</h2>
         {card.서브타이틀 && (
-          <p className="mt-0.5 text-xs font-medium text-[#777777] uppercase tracking-widest">
-            {card.서브타이틀}
-          </p>
+          <p className="mt-0.5 text-xs font-medium text-[#777777] uppercase tracking-widest">{card.서브타이틀}</p>
         )}
       </div>
 
@@ -129,9 +93,7 @@ export default function ProjectCard({ card, detailsLabel, soonLabel, soonNoUrlMs
       {descriptions.length > 0 && (
         <div className="z-10 mt-auto space-y-0.5">
           {detailsLabel && (
-            <p className="text-[10px] font-semibold uppercase tracking-widest text-[#555555] mb-1.5">
-              {detailsLabel}
-            </p>
+            <p className="text-[10px] font-semibold uppercase tracking-widest text-[#555555] mb-1.5">{detailsLabel}</p>
           )}
           {descriptions.map((desc, i) => (
             <p key={i} className="text-[12px] font-light text-[#aaaaaa] leading-relaxed">{desc}</p>
@@ -146,8 +108,8 @@ export default function ProjectCard({ card, detailsLabel, soonLabel, soonNoUrlMs
         </div>
       )}
 
-      {/* PRIVATE 호버 오버레이 */}
-      {isPrivate && tooltipVisible && (
+      {/* PRIVATE 호버 딤드 오버레이 */}
+      {isPrivate && hoverDim && (
         <div className="absolute inset-0 rounded-2xl bg-black/70 backdrop-blur-[2px] flex items-center justify-center z-10 px-4">
           <p className="text-sm text-amber-400 font-medium text-center leading-relaxed">
             {privateTexts.hoverMsg}
@@ -167,79 +129,20 @@ export default function ProjectCard({ card, detailsLabel, soonLabel, soonNoUrlMs
   // ── PRIVATE 카드 ──
   if (isPrivate) {
     return (
-      <>
-        <div
-          className={`${disableHover ? "" : "card-hover "}h-full cursor-pointer`}
-          onClick={() => setModalOpen(true)}
-          onMouseEnter={() => setTooltipVisible(true)}
-          onMouseLeave={() => setTooltipVisible(false)}
-          role="button"
-          aria-label={card.타이틀}
-        >
-          {cardBody}
-        </div>
-
-        {/* 비밀번호 모달 */}
-        {modalOpen && (
-          <div
-            className="fixed inset-0 z-50 flex items-center justify-center"
-            style={{ background: "rgba(0,0,0,0.75)", backdropFilter: "blur(4px)", WebkitBackdropFilter: "blur(4px)" }}
-            onClick={closeModal}
-          >
-            <form
-              onClick={(e) => e.stopPropagation()}
-              onSubmit={handlePrivateSubmit}
-              className="w-72 rounded-2xl p-6"
-              style={{ background: "#1c1c1c", border: "1px solid #333333" }}
-            >
-              {/* 헤더 */}
-              <div className="flex items-center justify-between mb-4">
-                <p className="text-sm font-semibold text-[#cccccc] flex items-center gap-1.5">
-                  <LockIcon />
-                  {privateTexts.passwordTitle}
-                </p>
-                <button type="button" onClick={closeModal} className="text-[#666666] hover:text-[#aaaaaa] transition-colors">
-                  <svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2.5" strokeLinecap="round">
-                    <path d="M18 6 6 18M6 6l12 12" />
-                  </svg>
-                </button>
-              </div>
-
-              {/* 입력 */}
-              <input
-                type="password"
-                value={password}
-                onChange={(e) => { setPassword(e.target.value); setPwError(false); }}
-                placeholder={privateTexts.passwordPlaceholder}
-                autoFocus
-                className="w-full bg-transparent border-b py-1.5 text-sm text-[#e8e8e8] placeholder-[#555555] focus:outline-none mb-4"
-                style={{ borderColor: pwError ? "#f87171" : "#3a3a3a" }}
-                onFocus={(e) => { if (!pwError) e.target.style.borderColor = "#666666"; }}
-                onBlur={(e) => { if (!pwError) e.target.style.borderColor = "#3a3a3a"; }}
-              />
-
-              {/* 에러 메시지 */}
-              <p className={`text-[11px] text-red-400 mb-3 transition-opacity ${pwError ? "opacity-100" : "opacity-0"}`}>
-                {privateTexts.passwordError}
-              </p>
-
-              {/* 제출 버튼 */}
-              <button
-                type="submit"
-                disabled={submitting || !password.trim()}
-                className="w-full py-2 rounded-lg text-sm font-medium text-[#cccccc] hover:text-white transition-all disabled:opacity-30 disabled:cursor-not-allowed"
-                style={{ background: "#2a2a2a", border: "1px solid #444444" }}
-              >
-                {submitting ? "확인 중..." : privateTexts.passwordSubmit}
-              </button>
-            </form>
-          </div>
-        )}
-      </>
+      <div
+        className={`${disableHover ? "" : "card-hover "}h-full cursor-pointer`}
+        onClick={() => onPrivateClick?.()}
+        onMouseEnter={() => setHoverDim(true)}
+        onMouseLeave={() => setHoverDim(false)}
+        role="button"
+        aria-label={card.타이틀}
+      >
+        {cardBody}
+      </div>
     );
   }
 
-  // ── SOON + URL → 링크 ──
+  // ── SOON + URL ──
   if (isSoon && card.URL) {
     return (
       <a href={card.URL} target="_blank" rel="noopener noreferrer"
@@ -250,7 +153,7 @@ export default function ProjectCard({ card, detailsLabel, soonLabel, soonNoUrlMs
     );
   }
 
-  // ── SOON + URL 없음 → 토스트 ──
+  // ── SOON + URL 없음 ──
   if (isSoon) {
     return (
       <div className="h-full cursor-pointer" onClick={showToast} role="button" aria-label={card.타이틀}>
