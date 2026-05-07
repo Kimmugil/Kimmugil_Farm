@@ -144,22 +144,28 @@ export async function fetchDMs(maxCount = 30): Promise<DmMessage[]> {
 
   const res = await sheets.spreadsheets.values.get({
     spreadsheetId,
-    range: "DM!A:E",
+    range: "DM!A:F",
   });
 
   const rows = res.data.values ?? [];
   if (rows.length < 2) return [];
 
   const dataRows = rows.slice(1).slice(-maxCount);
-  return dataRows.map((row) => {
-    const petUuid = (row[4] ?? "").trim();
-    return {
-      nickname:  row[2] ?? "알 수 없음",
-      content:   row[3] ?? "",
-      timestamp: row[1] ?? "",
-      ...(petUuid ? { petUuid } : {}),
-    };
-  }).filter((m) => m.content.trim());
+  return dataRows
+    .filter((row) => {
+      const content = (row[3] ?? "").trim();
+      const hidden  = (row[5] ?? "").trim().toLowerCase() === "hide";
+      return content && !hidden;
+    })
+    .map((row) => {
+      const petUuid = (row[4] ?? "").trim();
+      return {
+        nickname:  row[2] ?? "알 수 없음",
+        content:   row[3] ?? "",
+        timestamp: row[1] ?? "",
+        ...(petUuid ? { petUuid } : {}),
+      };
+    });
 }
 
 export async function fetchDmMaster(): Promise<DmMasterConfig> {
