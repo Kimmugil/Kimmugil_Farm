@@ -62,7 +62,7 @@ export default function ProjectCard({ card, detailsLabel, soonLabel, soonNoUrlMs
   const [hoverDim, setHoverDim] = useState(false);
 
   const cardBody = (
-    <div className="relative flex flex-col h-full min-h-[280px] rounded-2xl border border-[#282828] bg-[#141414] p-5 overflow-hidden">
+    <div className="relative flex flex-col h-full min-h-[280px] rounded-2xl border border-[#282828] bg-[#141414]/80 backdrop-blur-md p-5 overflow-hidden">
 
       {/* 뱃지 */}
       {badgeStyle && (
@@ -119,7 +119,7 @@ export default function ProjectCard({ card, detailsLabel, soonLabel, soonNoUrlMs
 
       {/* SOON 토스트 */}
       {toastVisible && (
-        <div className="absolute inset-x-4 bottom-4 z-20 bg-[#222222] border border-[#333333] rounded-xl px-4 py-2.5 text-center text-xs text-[#aaaaaa] animate-fade-in">
+        <div className="absolute inset-x-4 bottom-4 z-20 bg-[#222222]/80 backdrop-blur-md border border-[#333333] rounded-xl px-4 py-2.5 text-center text-xs text-[#aaaaaa] animate-fade-in">
           {soonNoUrlMsg}
         </div>
       )}
