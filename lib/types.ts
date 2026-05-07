@@ -7,6 +7,7 @@ export interface SiteConfig {
   DM_ANON_NICKNAME: string;
   DM_LEFT_OFFSET: string;
   DM_RIGHT_PADDING: string;
+  BG_IMAGE: boolean;
 }
 
 export interface DmPet {

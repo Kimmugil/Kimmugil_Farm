@@ -21,6 +21,7 @@ export default async function Home() {
     return (
       <PortfolioClient
         isOpen={config.OPEN}
+        bgImage={config.BG_IMAGE}
         initialTexts={texts}
         initialCards={sanitizedCards}
         scrollSpeed={config.SCROLL_SPEED}

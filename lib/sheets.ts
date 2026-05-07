@@ -57,6 +57,7 @@ export async function fetchConfig(): Promise<SiteConfig> {
     DM_ANON_NICKNAME: map["DM_ANON_NICKNAME"] ?? "익명의 농부",
     DM_LEFT_OFFSET: map["DM_LEFT_OFFSET"] ?? "20%",
     DM_RIGHT_PADDING: map["DM_RIGHT_PADDING"] ?? "10%",
+    BG_IMAGE: map["BG_IMAGE"]?.toLowerCase() === "true",
   };
 }
 

@@ -7,6 +7,7 @@ import PageLayout from "./PageLayout";
 
 interface Props {
   isOpen: boolean;
+  bgImage: boolean;
   initialTexts: UITexts;
   initialCards: Card[];
   scrollSpeed: number;
@@ -14,7 +15,7 @@ interface Props {
   dmMaster: DmMasterConfig;
 }
 
-export default function PortfolioClient({ isOpen, initialTexts, initialCards, scrollSpeed, initialDms, dmMaster }: Props) {
+export default function PortfolioClient({ isOpen, bgImage, initialTexts, initialCards, scrollSpeed, initialDms, dmMaster }: Props) {
   const [unlocked, setUnlocked] = useState(isOpen);
   const [texts, setTexts] = useState<UITexts>(initialTexts);
   const [cards, setCards] = useState<Card[]>(initialCards);
@@ -62,6 +63,7 @@ export default function PortfolioClient({ isOpen, initialTexts, initialCards, sc
         scrollSpeed={scrollSpeed}
         initialDms={initialDms}
         dmMaster={dmMaster}
+        bgImage={bgImage}
       />
 
       {/* 동기화 버튼 */}

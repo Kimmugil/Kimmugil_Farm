@@ -12,6 +12,7 @@ interface Props {
   scrollSpeed: number;
   initialDms: DmMessage[];
   dmMaster: DmMasterConfig;
+  bgImage: boolean;
 }
 
 function MarqueeIcon({ active }: { active: boolean }) {
@@ -47,7 +48,7 @@ function DmIcon() {
 
 const CARD_AREA_H = 336;
 
-export default function PageLayout({ cards, texts, scrollSpeed, initialDms, dmMaster }: Props) {
+export default function PageLayout({ cards, texts, scrollSpeed, initialDms, dmMaster, bgImage }: Props) {
   const [view, setView]           = useState<"marquee" | "grid">("marquee");
   const [hoveredIdx, setHoveredIdx] = useState<number | null>(null);
   const [dms, setDms]             = useState<DmMessage[]>(initialDms);
@@ -141,7 +142,15 @@ export default function PageLayout({ cards, texts, scrollSpeed, initialDms, dmMa
 
   return (
     <>
-      <main className="min-h-screen flex flex-col overflow-hidden">
+      <main
+        className="min-h-screen flex flex-col overflow-hidden"
+        style={bgImage ? {
+          backgroundImage: "linear-gradient(rgba(0,0,0,0.65), rgba(0,0,0,0.65)), url('/ss.png')",
+          backgroundSize: "cover",
+          backgroundPosition: "center",
+          backgroundAttachment: "fixed",
+        } : undefined}
+      >
 
         {/* ── 히어로 영역 ── */}
         <section className="flex-1 min-h-0 relative overflow-hidden">
